@@ -1,7 +1,8 @@
 pipeline {
     agent {
-        docker {
-            image 'node:20'
+        dockerfile {
+            filename 'Dockerfile'
+            dir 'ci'
             label 'linux-build'
         }
     }
@@ -26,7 +27,7 @@ pipeline {
         stage('Unit Test') {
             steps {
                 dir('backend') {
-                    sh 'npm test -- --coverage --reporters=jest-junit'
+                    sh 'npm test -- --coverage'
                 }
             }
         }
@@ -36,8 +37,8 @@ pipeline {
         	dir('backend') {
 		    script {
             	    	def scannerHome = tool 'sonar-scanner'
-			def jdkHome = tool 'temurin-21'
-			withEnv(["JAVA_HOME=${jdkHome}", "PATH+JAVA=${jdkHome}/bin"]) {
+			// JDK 21 is provided by the CI image, avoiding agent tool-cache permissions.
+			withEnv(['JAVA_HOME=/opt/java/openjdk', 'PATH+JAVA=/opt/java/openjdk/bin']) {
 			    withSonarQubeEnv('SonarQube') {
 				sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=. -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
 			    }
