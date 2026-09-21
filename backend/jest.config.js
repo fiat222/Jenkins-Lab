@@ -5,6 +5,15 @@ module.exports = {
   testEnvironment: 'node',
   roots: ['<rootDir>/src'],
   testRegex: '.*\\.spec\\.ts$',
+  // Lab 05.4: temporarily exclude combat-engine tests to prove the SonarQube gate.
+  testPathIgnorePatterns: [
+    '<rootDir>/src/game/abilities.spec.ts',
+    '<rootDir>/src/game/damage.spec.ts',
+    '<rootDir>/src/game/engine.spec.ts',
+    '<rootDir>/src/game/helpers.spec.ts',
+    '<rootDir>/src/game/targeting.spec.ts',
+    '<rootDir>/src/redis/scripts/lua.spec.ts',
+  ],
   collectCoverageFrom: [
     'src/game/**/*.ts',
     '!src/game/**/*.spec.ts',
