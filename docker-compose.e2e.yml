@@ -1,0 +1,33 @@
+services:
+  postgres-primary:
+    container_name: e2e-postgres-primary
+
+  postgres-replica:
+    container_name: e2e-postgres-replica
+
+  redis:
+    container_name: e2e-redis
+
+  nest-1:
+    container_name: e2e-nest-1
+
+  nest-2:
+    container_name: e2e-nest-2
+
+  nest-3:
+    container_name: e2e-nest-3
+
+  # The E2E suite reaches nginx by its Docker DNS name; no host ports are needed.
+  nginx:
+    container_name: e2e-nginx
+    ports: !reset []
+
+  # pgAdmin is not part of the API test environment.
+  pgadmin:
+    container_name: e2e-pgadmin
+    profiles: ['manual']
+
+networks:
+  default:
+    name: jenkins-net
+    external: true

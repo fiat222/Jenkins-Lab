@@ -57,6 +57,49 @@ pipeline {
 	    }
 	}
 
+        stage('E2E') {
+            agent {
+                dockerfile {
+                    filename 'Dockerfile'
+                    dir 'ci/playwright'
+                    label 'linux-build'
+                    args '--network jenkins-net -v /var/run/docker.sock:/var/run/docker.sock'
+                }
+            }
+            environment {
+                E2E_BASE_URL = 'http://nginx'
+            }
+            steps {
+                sh '''
+                    docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e up -d --build
+
+                    for attempt in $(seq 1 30); do
+                      curl --fail --silent --show-error http://nginx/health/ready && break
+                      sleep 2
+                    done
+
+                    curl --fail --silent --show-error http://nginx/health/ready
+                    cd e2e
+                    npm ci
+                    npm run test:e2e
+                '''
+            }
+            post {
+                always {
+                    junit 'e2e/reports/junit.xml'
+                    publishHTML(target: [
+                        reportDir: 'e2e/playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: 'Playwright E2E Report',
+                        keepAll: true,
+                        alwaysLinkToLastBuild: true,
+                    ])
+                    archiveArtifacts artifacts: 'e2e/playwright-report/**', allowEmptyArchive: true
+                    sh 'docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e down -v --remove-orphans'
+                }
+            }
+        }
+
         stage('Deploy - Staging') {
             when { branch 'develop' }
             steps { sh 'echo deploying to staging...' }

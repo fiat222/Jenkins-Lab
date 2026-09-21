@@ -34,6 +34,10 @@ yarn-debug.log*
 # Coverage
 coverage/
 .nyc_output/
+e2e/reports/
+e2e/playwright-report/
+recovered/
+tmp/
 
 # Misc
 Thumbs.db
