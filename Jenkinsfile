@@ -24,8 +24,28 @@ pipeline {
             steps { dir('backend') { sh 'npm run lint' } }
         }
         stage('Unit Test') {
-            steps { dir('backend') { sh 'npm test' } }
+            steps {
+                dir('backend') {
+                    sh 'npm test -- --coverage --reporters=jest-junit'
+                }
+            }
         }
+
+	stage('SonarQube Analysis') {
+	    steps {
+		withSonarQubeEnv('SonarQube') {
+		    sh 'sonar-scanner -Dsonar.projectKey=taskflow-api'
+		}
+	    }
+	}
+	stage('Quality Gate') {
+	    steps {
+		timeout(time: 5, unit: 'MINUTES') {
+		    waitForQualityGate abortPipeline: true
+		}
+	    }
+	}
+
         stage('Deploy - Staging') {
             when { branch 'develop' }
             steps { sh 'echo deploying to staging...' }
@@ -41,6 +61,8 @@ pipeline {
         success { echo "${env.APP_NAME} passed on ${env.NODE_ENV}" }
         failure { echo "Failed at stage: ${env.STAGE_NAME}" }
         always {
+            junit 'backend/reports/junit.xml'
+            publishCoverage adapters: [coberturaAdapter('backend/coverage/cobertura-coverage.xml')]
             archiveArtifacts artifacts: 'backend/npm-debug.log*', allowEmptyArchive: true
         }
     }
