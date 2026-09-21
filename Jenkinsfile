@@ -5,7 +5,10 @@ pipeline {
             dir 'ci'
             label 'linux-build'
             // Build containers must share SonarQube's network for DNS resolution.
-            args '--network jenkins-net'
+            // Docker Pipeline first supplies -u 1000:1000. The agent mounts
+            // its daemon socket as root:root (0660), so this final user value
+            // keeps UID 1000 while granting the required socket group.
+            args '--network jenkins-net -u 1000:0'
         }
     }
 
