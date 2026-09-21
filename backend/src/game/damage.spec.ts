@@ -10,7 +10,7 @@ describe('applyDamage (docs/05 §3)', () => {
     const events: CombatEvent[] = [];
     applyDamage(target, 20, src, 1, 1, events);
 
-    expect(target.hp).toBe(999); 
+    expect(target.hp).toBe(80); 
     expect(target.alive).toBe(true);
     expect(events).toEqual([
       {
