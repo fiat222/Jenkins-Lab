@@ -62,7 +62,10 @@ pipeline {
             steps { sh 'echo deploying to staging...' }
         }
         stage('Deploy - Production') {
-            when { branch 'main' }
+            when {
+                beforeInput true
+                branch 'main'
+            }
             input { message 'Deploy to production?' }
             steps { sh 'echo deploying to production...' }
         }
