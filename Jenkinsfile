@@ -34,10 +34,10 @@ pipeline {
 	stage('SonarQube Analysis') {
     	    steps {
         	dir('backend') {
-		    Script {
+		    script {
             	    	def scannerHome = tool 'sonar-scanner'
 			withSonarQubeEnv('SonarQube') {
-                	    sh 'sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=. -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info'
+			    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=. -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
             	    	}
         	    }
     	    	}
