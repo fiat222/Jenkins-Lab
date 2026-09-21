@@ -36,9 +36,12 @@ pipeline {
         	dir('backend') {
 		    script {
             	    	def scannerHome = tool 'sonar-scanner'
-			withSonarQubeEnv('SonarQube') {
-			    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=. -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
-            	    	}
+			def jdkHome = tool 'temurin-21'
+			withEnv(["JAVA_HOME=${jdkHome}", "PATH+JAVA=${jdkHome}/bin"]) {
+			    withSonarQubeEnv('SonarQube') {
+				sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=. -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
+			    }
+			}
         	    }
     	    	}
 	    }
