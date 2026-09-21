@@ -4,6 +4,8 @@ pipeline {
             filename 'Dockerfile'
             dir 'ci'
             label 'linux-build'
+            // Build containers must share SonarQube's network for DNS resolution.
+            args '--network jenkins-net'
         }
     }
 
@@ -71,7 +73,7 @@ pipeline {
         failure { echo "Failed at stage: ${env.STAGE_NAME}" }
         always {
             junit 'backend/reports/junit.xml'
-            publishCoverage adapters: [coberturaAdapter('backend/coverage/cobertura-coverage.xml')]
+            recordCoverage tools: [[parser: 'COBERTURA', pattern: 'backend/coverage/cobertura-coverage.xml']]
             archiveArtifacts artifacts: 'backend/npm-debug.log*', allowEmptyArchive: true
         }
     }
