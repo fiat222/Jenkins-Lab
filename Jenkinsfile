@@ -67,7 +67,8 @@ pipeline {
             steps {
                 sh '''
                     docker build --tag "taskflow-e2e:${BUILD_TAG}" --file ci/playwright/Dockerfile ci/playwright
-                    docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e up -d --build
+                    docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e down -v --remove-orphans || true
+                    docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e up -d --build postgres-primary redis nest-1 nest-2 nest-3 nginx
 
                     for attempt in $(seq 1 30); do
                       curl --fail --silent --show-error "$E2E_BASE_URL/health/ready" && break
@@ -87,7 +88,8 @@ pipeline {
             }
             post {
                 always {
-                    junit 'e2e/reports/junit.xml'
+                    sh 'docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e down -v --remove-orphans'
+                    junit testResults: 'e2e/reports/junit.xml', allowEmptyResults: true
                     publishHTML(target: [
                         reportDir: 'e2e/playwright-report',
                         reportFiles: 'index.html',
@@ -96,7 +98,6 @@ pipeline {
                         alwaysLinkToLastBuild: true,
                     ])
                     archiveArtifacts artifacts: 'e2e/playwright-report/**', allowEmptyArchive: true
-                    sh 'docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e down -v --remove-orphans'
                 }
             }
         }

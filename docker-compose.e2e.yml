@@ -1,6 +1,10 @@
 services:
   postgres-primary:
     container_name: e2e-postgres-primary
+    # Compose is invoked from Jenkins' Docker agent. Do not bind-mount the
+    # host init script here: the Docker daemon sees that nested path as a
+    # directory. E2E only needs the primary database, not replication.
+    volumes: !reset []
 
   postgres-replica:
     container_name: e2e-postgres-replica
