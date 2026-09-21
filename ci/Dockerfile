@@ -13,6 +13,7 @@ COPY --from=docker_cli /usr/local/libexec/docker/cli-plugins/docker-compose /usr
 ENV JAVA_HOME=/opt/java/openjdk
 ENV PATH="${JAVA_HOME}/bin:${PATH}"
 
-# Verify the JDK also works as the non-root Jenkins build user.
-USER 1000:1000
+# The Jenkins agent mounts its Docker socket as root:root (0660).  Retain the
+# non-root Jenkins UID while joining group 0 so Compose can use that socket.
+USER 1000:0
 RUN java -version && node --version && npm --version && docker --version && docker compose version
