@@ -32,11 +32,15 @@ pipeline {
         }
 
 	stage('SonarQube Analysis') {
-	    steps {
-		withSonarQubeEnv('SonarQube') {
-		    sh 'sonar-scanner -Dsonar.projectKey=taskflow-api'
-		}
-	    }
+    	    agent { label 'linux-build' }
+    	    tools { 'hudson.plugins.sonar.SonarRunnerInstallation' 'sonar-scanner' }
+    	    steps {
+        	dir('backend') {
+            	    withSonarQubeEnv('SonarQube') {
+                	sh 'sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=. -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info'
+            	    }
+        	}
+    	    }
 	}
 	stage('Quality Gate') {
 	    steps {
