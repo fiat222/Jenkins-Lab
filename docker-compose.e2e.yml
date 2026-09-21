@@ -25,6 +25,9 @@ services:
   nginx:
     container_name: e2e-nginx
     ports: !reset []
+    # nginx/Dockerfile already copies the config into the image. A workspace
+    # bind mount cannot be resolved by the host daemon from Jenkins' container.
+    volumes: !reset []
 
   # pgAdmin is not part of the API test environment.
   pgadmin:

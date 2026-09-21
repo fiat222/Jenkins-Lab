@@ -96,6 +96,7 @@ pipeline {
                         reportName: 'Playwright E2E Report',
                         keepAll: true,
                         alwaysLinkToLastBuild: true,
+                        allowMissing: true,
                     ])
                     archiveArtifacts artifacts: 'e2e/playwright-report/**', allowEmptyArchive: true
                 }
