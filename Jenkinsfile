@@ -18,25 +18,22 @@ pipeline {
 
     stages {
         stage('Install') {
-            steps {
-                dir('backend') {
-                    sh 'npm ci'
-                }
-            }
+            steps { dir('backend') { sh 'npm ci' } }
         }
         stage('Lint') {
-            steps {
-                dir('backend') {
-                    sh 'npm run lint'
-                }
-            }
+            steps { dir('backend') { sh 'npm run lint' } }
         }
         stage('Unit Test') {
-            steps {
-                dir('backend') {
-                    sh 'npm test'
-                }
-            }
+            steps { dir('backend') { sh 'npm test' } }
+        }
+        stage('Deploy - Staging') {
+            when { branch 'develop' }
+            steps { sh 'echo deploying to staging...' }
+        }
+        stage('Deploy - Production') {
+            when { branch 'main' }
+            input { message 'Deploy to production?' }
+            steps { sh 'echo deploying to production...' }
         }
     }
 
