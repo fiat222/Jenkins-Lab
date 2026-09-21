@@ -58,30 +58,28 @@ pipeline {
 	}
 
         stage('E2E') {
-            agent {
-                dockerfile {
-                    filename 'Dockerfile'
-                    dir 'ci/playwright'
-                    label 'linux-build'
-                    args '--network jenkins-net -v /var/run/docker.sock:/var/run/docker.sock'
-                }
-            }
             environment {
-                E2E_BASE_URL = 'http://nginx'
+                E2E_BASE_URL = 'http://e2e-nginx'
             }
             steps {
                 sh '''
+                    docker build --tag "taskflow-e2e:${BUILD_TAG}" --file ci/playwright/Dockerfile ci/playwright
                     docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e up -d --build
 
                     for attempt in $(seq 1 30); do
-                      curl --fail --silent --show-error http://nginx/health/ready && break
+                      curl --fail --silent --show-error "$E2E_BASE_URL/health/ready" && break
                       sleep 2
                     done
 
-                    curl --fail --silent --show-error http://nginx/health/ready
-                    cd e2e
-                    npm ci
-                    npm run test:e2e
+                    curl --fail --silent --show-error "$E2E_BASE_URL/health/ready"
+                    docker run --rm \\
+                      --network jenkins-net \\
+                      --volumes-from "$HOSTNAME" \\
+                      --user "$(id --user):$(id --group)" \\
+                      --workdir "$PWD/e2e" \\
+                      --env E2E_BASE_URL \\
+                      "taskflow-e2e:${BUILD_TAG}" \\
+                      sh -c 'npm ci && npm run test:e2e'
                 '''
             }
             post {
