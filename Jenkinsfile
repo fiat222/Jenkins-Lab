@@ -105,16 +105,11 @@ pipeline {
                     script {
                         sh 'npm audit --json > audit.json || true'
 
-                        def audit = readJSON file: 'audit.json'
-                        def vulnerabilities = audit.metadata?.vulnerabilities
-                        if (vulnerabilities == null) {
-                            error('npm audit did not return vulnerability metadata')
-                        }
-
-                        int critical = vulnerabilities.critical ?: 0
-                        int high = vulnerabilities.high ?: 0
-                        int moderate = vulnerabilities.moderate ?: 0
-                        int low = vulnerabilities.low ?: 0
+                        def counts = sh(script: """node -e 'const v=require("./audit.json").metadata?.vulnerabilities; if (!v) process.exit(2); console.log([v.critical||0,v.high||0,v.moderate||0,v.low||0].join(","))'""", returnStdout: true).trim().split(',')
+                        int critical = counts[0].toInteger()
+                        int high = counts[1].toInteger()
+                        int moderate = counts[2].toInteger()
+                        int low = counts[3].toInteger()
 
                         echo "npm audit: critical=${critical}, high=${high}, moderate=${moderate}, low=${low}"
                         if (critical > 0) {
