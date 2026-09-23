@@ -1,0 +1,10 @@
+[[allowlists]]
+description = "Ignore known test-only false positives in their original commits and files."
+commits = [
+  "36a6efa0568d6084e00c8afc11b64a7a0a4b9322",
+  "48c80c05e086da8af268ce49026181d402386cae",
+]
+paths = [
+  "^\\.github/workflows/backend-ci\\.yml$",
+  "^backend/src/ws/ws\\.smoke\\.ts$",
+]

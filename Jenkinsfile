@@ -33,6 +33,7 @@ pipeline {
                     zricethezav/gitleaks:v8.21.2 \
                     detect \
                     --source . \
+                    --config .gitleaks.toml \
                     --log-opts="--all" \
                     --report-format json \
                     --report-path security/gitleaks.json
