@@ -144,18 +144,13 @@ pipeline {
                         --workdir "$PWD" \
                         anchore/syft:v1.42.3 \
                         scan dir:backend \
-                        -o cyclonedx-json=security/
-                        taskflow-api.cdx.json
+                        -o cyclonedx-json=security/taskflow-api.cdx.json
                 '''
 
                 withCredentials([
-                    file(credentialsId: 'cosign-private-
-                    key', variable: 'COSIGN_KEY'),
-                    file(credentialsId: 'cosign-public-
-                    key', variable: 'COSIGN_PUB'),
-                    string(credentialsId: 'cosign-key-
-                    password', variable:
-                    'COSIGN_PASSWORD')
+                    file(credentialsId: 'cosign-private-key', variable: 'COSIGN_KEY'),
+                    file(credentialsId: 'cosign-public-key', variable: 'COSIGN_PUB'),
+                    string(credentialsId: 'cosign-key-password', variable: 'COSIGN_PASSWORD')
                 ]) {
                     sh '''
                         docker run --rm \
@@ -165,8 +160,7 @@ pipeline {
                             ghcr.io/sigstore/cosign/cosign:v3.0.2 \
                             sign-blob --yes \
                             --key "$COSIGN_KEY" \
-                            --bundle security/taskflow-
-                            api.cdx.bundle.json \
+                            --bundle security/taskflow-api.cdx.bundle.json \
                             security/taskflow-api.cdx.json
 
                         docker run --rm \
@@ -175,17 +169,14 @@ pipeline {
                             ghcr.io/sigstore/cosign/cosign:v3.0.2 \
                             verify-blob \
                             --key "$COSIGN_PUB" \
-                            --bundle security/taskflow-
-                            api.cdx.bundle.json \
+                            --bundle security/taskflow-api.cdx.bundle.json \
                             security/taskflow-api.cdx.json
                     '''
                 }
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'security/
-                    taskflow-api.cdx.json,security/
-                    taskflow-api.cdx.bundle.json',
+                    archiveArtifacts artifacts: 'security/taskflow-api.cdx.json,security/taskflow-api.cdx.bundle.json',
                         allowEmptyArchive: true
                 }
             }
