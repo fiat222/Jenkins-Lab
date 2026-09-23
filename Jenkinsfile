@@ -58,29 +58,68 @@ pipeline {
                 }
             }
         }
+        stage('SAST') {
+            steps {
+                sh '''
+                    mkdir -p security
 
-	stage('SonarQube Analysis') {
-    	    steps {
-        	dir('backend') {
-		    script {
-            	    	def scannerHome = tool 'sonar-scanner'
-			// JDK 21 is provided by the CI image, avoiding agent tool-cache permissions.
-			withEnv(['JAVA_HOME=/opt/java/openjdk', 'PATH+JAVA=/opt/java/openjdk/bin']) {
-			    withSonarQubeEnv('SonarQube') {
-				sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=. -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
-			    }
-			}
-        	    }
-    	    	}
-	    }
-	}
-	stage('Quality Gate') {
-	    steps {
-		timeout(time: 5, unit: 'MINUTES') {
-		    waitForQualityGate abortPipeline: true
-		}
-	    }
-	}
+                    set +e
+                    (
+                        cd backend
+                        npx eslint --plugin security src/ \
+                        --format @microsoft/eslint-formatter-sarif \
+                        --output-file ../security/eslint.sarif
+                    )
+                    eslint_status=$?
+
+                    docker run --rm \
+                        --volumes-from "$HOSTNAME" \
+                        --workdir "$PWD" \
+                        returntocorp/semgrep:1.95.0 \
+                        semgrep scan \
+                        --config=p/owasp-top-ten \
+                        --config=p/nodejs \
+                        --sarif \
+                        --output security/semgrep.sarif \
+                        .
+                    semgrep_status=$?
+                    set -e
+
+                    if [ "$eslint_status" -gt 1 ] || [ "$semgrep_status" -ne 0 ]; then
+                        echo "SAST scanner failed: eslint=$eslint_status semgrep=$semgrep_status"
+                        exit 1
+                    fi
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'security/*.sarif', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+                steps {
+                dir('backend') {
+                script {
+                            def scannerHome = tool 'sonar-scanner'
+                // JDK 21 is provided by the CI image, avoiding agent tool-cache permissions.
+                withEnv(['JAVA_HOME=/opt/java/openjdk', 'PATH+JAVA=/opt/java/openjdk/bin']) {
+                    withSonarQubeEnv('SonarQube') {
+                    sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=. -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
+                    }
+                }
+                    }
+                    }
+            }
+        }
+        stage('Quality Gate') {
+            steps {
+            timeout(time: 5, unit: 'MINUTES') {
+                waitForQualityGate abortPipeline: true
+            }
+            }
+        }
 
         stage('E2E') {
             environment {

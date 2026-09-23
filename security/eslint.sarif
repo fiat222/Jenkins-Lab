@@ -1,0 +1,1326 @@
+{
+  "version": "2.1.0",
+  "$schema": "http://json.schemastore.org/sarif-2.1.0-rtm.5",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "ESLint",
+          "informationUri": "https://eslint.org",
+          "rules": [
+            {
+              "id": "security/detect-object-injection",
+              "helpUri": "https://github.com/eslint-community/eslint-plugin-security/blob/main/docs/rules/detect-object-injection.md",
+              "properties": {
+                "category": "Possible Security Vulnerability"
+              },
+              "shortDescription": {
+                "text": "Detects \"variable[key]\" as a left- or right-hand assignment operand."
+              }
+            },
+            {
+              "id": "security/detect-non-literal-fs-filename",
+              "helpUri": "https://github.com/eslint-community/eslint-plugin-security/blob/main/docs/rules/detect-non-literal-fs-filename.md",
+              "properties": {
+                "category": "Possible Security Vulnerability"
+              },
+              "shortDescription": {
+                "text": "Detects variable in filename argument of \"fs\" calls, which might allow an attacker to access anything on your system."
+              }
+            },
+            {
+              "id": "security/detect-possible-timing-attacks",
+              "helpUri": "https://github.com/eslint-community/eslint-plugin-security/blob/main/docs/rules/detect-possible-timing-attacks.md",
+              "properties": {
+                "category": "Possible Security Vulnerability"
+              },
+              "shortDescription": {
+                "text": "Detects insecure comparisons (`==`, `!=`, `!==` and `===`), which check input sequentially."
+              }
+            }
+          ],
+          "version": "8.57.1"
+        }
+      },
+      "artifacts": [
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/app.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/auth/auth.controller.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/auth/auth.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/auth/auth.service.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/auth/dto/auth-response.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/auth/dto/login.dto.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/auth/dto/refresh.dto.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/auth/dto/register.dto.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/auth/guards/jwt-access.guard.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/common/filters/all-exceptions.filter.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/common/health.controller.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/common/jwt-auth.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/common/logger/logger.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/common/swagger.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/common/throttle/ws-throttle.guard.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/data-source.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/database/entities.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/abilities.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/constants.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/damage.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/engine.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/engine.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/fixtures/board-builder.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/fixtures/generate-golden.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/index.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/seeded-rng.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/targeting.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/types.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/main.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/dto/match-detail.dto.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/dto/match-history.dto.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match-lifecycle.integration.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match-lifecycle.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match-round.entity.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match.controller.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match.entity.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match.repository.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match.service.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/matchmaking/matchmaking.2client.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/matchmaking/matchmaking.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/matchmaking/matchmaking.processor.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/matchmaking/matchmaking.scheduler.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/matchmaking/matchmaking.service.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/matchmaking/matchmaking.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/migrations/1736000000000-CreateUsers.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/migrations/1788862344349-CreateMatches.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/queue/queue.constants.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/queue/queue.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/queue/queue.processors.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/queue/queue.service.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/queue/queue.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/queue/workers/queue.workers.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/redis/redis.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/redis/redis.service.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/redis/scripts/index.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/redis/scripts/smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/combat-engine.provider.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/combat-timing.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/combat.coordinator.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime-state.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.adapter.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/pubsub.bridge.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/pubsub.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/pubsub.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/round-orchestrator.integration.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/round-orchestrator.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.integration.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.service.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/user/decorators/current-user.decorator.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/user/dto/update-user.dto.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/user/user.controller.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/user/user.entity.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/user/user.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/user/user.service.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/guards/ws-auth.guard.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/ws-exception.filter.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/ws-throttle.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/ws.dto.smoke.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/ws.dto.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/ws.gateway.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/ws.module.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/ws.pipes.ts"
+          }
+        },
+        {
+          "location": {
+            "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/ws.smoke.ts"
+          }
+        }
+      ],
+      "results": [
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/common/filters/all-exceptions.filter.ts",
+                  "index": 9
+                },
+                "region": {
+                  "startLine": 122,
+                  "startColumn": 10,
+                  "endLine": 122,
+                  "endColumn": 21
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/constants.ts",
+                  "index": 18
+                },
+                "region": {
+                  "startLine": 55,
+                  "startColumn": 21,
+                  "endLine": 55,
+                  "endColumn": 44
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/constants.ts",
+                  "index": 18
+                },
+                "region": {
+                  "startLine": 75,
+                  "startColumn": 10,
+                  "endLine": 75,
+                  "endColumn": 33
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Found readFileSync from package \"fs\" with non literal argument at index 0"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/engine.smoke.ts",
+                  "index": 20
+                },
+                "region": {
+                  "startLine": 209,
+                  "startColumn": 31,
+                  "endLine": 209,
+                  "endColumn": 65
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-non-literal-fs-filename",
+          "ruleIndex": 1
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/engine.ts",
+                  "index": 21
+                },
+                "region": {
+                  "startLine": 61,
+                  "startColumn": 11,
+                  "endLine": 61,
+                  "endColumn": 20
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Function Call Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/game/engine.ts",
+                  "index": 21
+                },
+                "region": {
+                  "startLine": 61,
+                  "startColumn": 38,
+                  "endLine": 61,
+                  "endColumn": 47
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match.service.ts",
+                  "index": 38
+                },
+                "region": {
+                  "startLine": 179,
+                  "startColumn": 13,
+                  "endLine": 179,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Function Call Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match.service.ts",
+                  "index": 38
+                },
+                "region": {
+                  "startLine": 180,
+                  "startColumn": 33,
+                  "endLine": 180,
+                  "endColumn": 51
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Potential timing attack, left side: true"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/match/match.smoke.ts",
+                  "index": 39
+                },
+                "region": {
+                  "startLine": 183,
+                  "startColumn": 3,
+                  "endLine": 183,
+                  "endColumn": 48
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-possible-timing-attacks",
+          "ruleIndex": 2
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Function Call Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/matchmaking/matchmaking.smoke.ts",
+                  "index": 45
+                },
+                "region": {
+                  "startLine": 31,
+                  "startColumn": 28,
+                  "endLine": 31,
+                  "endColumn": 40
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Variable Assigned to Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/redis/redis.service.ts",
+                  "index": 55
+                },
+                "region": {
+                  "startLine": 58,
+                  "startColumn": 20,
+                  "endLine": 58,
+                  "endColumn": 43
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Potential timing attack, left side: true"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/redis/scripts/smoke.ts",
+                  "index": 57
+                },
+                "region": {
+                  "startLine": 288,
+                  "startColumn": 3,
+                  "endLine": 288,
+                  "endColumn": 48
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-possible-timing-attacks",
+          "ruleIndex": 2
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime-state.ts",
+                  "index": 61
+                },
+                "region": {
+                  "startLine": 117,
+                  "startColumn": 47,
+                  "endLine": 117,
+                  "endColumn": 70
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Function Call Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime-state.ts",
+                  "index": 61
+                },
+                "region": {
+                  "startLine": 136,
+                  "startColumn": 28,
+                  "endLine": 136,
+                  "endColumn": 40
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime-state.ts",
+                  "index": 61
+                },
+                "region": {
+                  "startLine": 136,
+                  "startColumn": 44,
+                  "endLine": 136,
+                  "endColumn": 56
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.adapter.ts",
+                  "index": 62
+                },
+                "region": {
+                  "startLine": 268,
+                  "startColumn": 31,
+                  "endLine": 268,
+                  "endColumn": 44
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Variable Assigned to Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.adapter.ts",
+                  "index": 62
+                },
+                "region": {
+                  "startLine": 282,
+                  "startColumn": 24,
+                  "endLine": 282,
+                  "endColumn": 43
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.adapter.ts",
+                  "index": 62
+                },
+                "region": {
+                  "startLine": 282,
+                  "startColumn": 24,
+                  "endLine": 282,
+                  "endColumn": 37
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.adapter.ts",
+                  "index": 62
+                },
+                "region": {
+                  "startLine": 292,
+                  "startColumn": 9,
+                  "endLine": 292,
+                  "endColumn": 28
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.adapter.ts",
+                  "index": 62
+                },
+                "region": {
+                  "startLine": 292,
+                  "startColumn": 9,
+                  "endLine": 292,
+                  "endColumn": 22
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.adapter.ts",
+                  "index": 62
+                },
+                "region": {
+                  "startLine": 729,
+                  "startColumn": 18,
+                  "endLine": 729,
+                  "endColumn": 31
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.adapter.ts",
+                  "index": 62
+                },
+                "region": {
+                  "startLine": 730,
+                  "startColumn": 49,
+                  "endLine": 730,
+                  "endColumn": 68
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/match.runtime.adapter.ts",
+                  "index": 62
+                },
+                "region": {
+                  "startLine": 730,
+                  "startColumn": 49,
+                  "endLine": 730,
+                  "endColumn": 62
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Potential timing attack, left side: true"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/pubsub.smoke.ts",
+                  "index": 66
+                },
+                "region": {
+                  "startLine": 244,
+                  "startColumn": 3,
+                  "endLine": 244,
+                  "endColumn": 48
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-possible-timing-attacks",
+          "ruleIndex": 2
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/runtime/round-orchestrator.smoke.ts",
+                  "index": 68
+                },
+                "region": {
+                  "startLine": 15,
+                  "startColumn": 43,
+                  "endLine": 15,
+                  "endColumn": 59
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Function Call Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.integration.smoke.ts",
+                  "index": 69
+                },
+                "region": {
+                  "startLine": 105,
+                  "startColumn": 45,
+                  "endLine": 105,
+                  "endColumn": 61
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Variable Assigned to Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.service.ts",
+                  "index": 71
+                },
+                "region": {
+                  "startLine": 102,
+                  "startColumn": 21,
+                  "endLine": 102,
+                  "endColumn": 52
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.service.ts",
+                  "index": 71
+                },
+                "region": {
+                  "startLine": 113,
+                  "startColumn": 7,
+                  "endLine": 113,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.service.ts",
+                  "index": 71
+                },
+                "region": {
+                  "startLine": 114,
+                  "startColumn": 7,
+                  "endLine": 114,
+                  "endColumn": 38
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Variable Assigned to Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.service.ts",
+                  "index": 71
+                },
+                "region": {
+                  "startLine": 127,
+                  "startColumn": 22,
+                  "endLine": 127,
+                  "endColumn": 43
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Variable Assigned to Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.service.ts",
+                  "index": 71
+                },
+                "region": {
+                  "startLine": 131,
+                  "startColumn": 20,
+                  "endLine": 131,
+                  "endColumn": 32
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.service.ts",
+                  "index": 71
+                },
+                "region": {
+                  "startLine": 134,
+                  "startColumn": 7,
+                  "endLine": 134,
+                  "endColumn": 19
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.service.ts",
+                  "index": 71
+                },
+                "region": {
+                  "startLine": 358,
+                  "startColumn": 19,
+                  "endLine": 358,
+                  "endColumn": 42
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Generic Object Injection Sink"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/shop/shop.service.ts",
+                  "index": 71
+                },
+                "region": {
+                  "startLine": 438,
+                  "startColumn": 5,
+                  "endLine": 438,
+                  "endColumn": 18
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-object-injection",
+          "ruleIndex": 0
+        },
+        {
+          "level": "warning",
+          "message": {
+            "text": "Potential timing attack, left side: true"
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "file:///D:/PSU/Y4/mobile%20240-331/DevOps/Lab/Jenkins-Lab/backend/src/ws/ws.smoke.ts",
+                  "index": 86
+                },
+                "region": {
+                  "startLine": 430,
+                  "startColumn": 3,
+                  "endLine": 430,
+                  "endColumn": 48
+                }
+              }
+            }
+          ],
+          "ruleId": "security/detect-possible-timing-attacks",
+          "ruleIndex": 2
+        }
+      ]
+    }
+  ]
+}
