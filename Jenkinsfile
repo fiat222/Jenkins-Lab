@@ -99,6 +99,116 @@ pipeline {
             }
         }
 
+        stage('SCA - npm audit') {
+            steps {
+                dir('backend') {
+                    script {
+                        sh 'npm audit --json > audit.json || true'
+
+                        def audit = readJSON file: 'audit.json'
+                        def vulnerabilities = audit.metadata?.vulnerabilities
+                        if (vulnerabilities == null) {
+                            error('npm audit did not return vulnerability metadata')
+                        }
+
+                        int critical = vulnerabilities.critical ?: 0
+                        int high = vulnerabilities.high ?: 0
+                        int moderate = vulnerabilities.moderate ?: 0
+                        int low = vulnerabilities.low ?: 0
+
+                        echo "npm audit: critical=${critical}, high=${high}, moderate=${moderate}, low=${low}"
+                        if (critical > 0) {
+                            echo "Critical vulnerabilities found; Policy Gate will
+                            decide the build result"
+                        }
+                        if (high > 0 || moderate > 0 || low > 0) {
+                            echo 'SCA warning: vulnerabilities found, but no Critical issues'
+                        } else {
+                            echo 'SCA passed: no vulnerabilities found'
+                        }
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'backend/audit.json', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Generate SBOM') {
+            steps {
+                sh '''
+                    mkdir -p security
+                    docker run --rm \
+                        --volumes-from "$HOSTNAME" \
+                        --workdir "$PWD" \
+                        anchore/syft:v1.42.3 \
+                        scan dir:backend \
+                        -o cyclonedx-json=security/
+                        taskflow-api.cdx.json
+                '''
+
+                withCredentials([
+                    file(credentialsId: 'cosign-private-
+                    key', variable: 'COSIGN_KEY'),
+                    file(credentialsId: 'cosign-public-
+                    key', variable: 'COSIGN_PUB'),
+                    string(credentialsId: 'cosign-key-
+                    password', variable:
+                    'COSIGN_PASSWORD')
+                ]) {
+                    sh '''
+                        docker run --rm \
+                            --volumes-from "$HOSTNAME" \
+                            --workdir "$PWD" \
+                            --env COSIGN_PASSWORD \
+                            ghcr.io/sigstore/cosign/cosign:v3.0.2 \
+                            sign-blob --yes \
+                            --key "$COSIGN_KEY" \
+                            --bundle security/taskflow-
+                            api.cdx.bundle.json \
+                            security/taskflow-api.cdx.json
+
+                        docker run --rm \
+                            --volumes-from "$HOSTNAME" \
+                            --workdir "$PWD" \
+                            ghcr.io/sigstore/cosign/cosign:v3.0.2 \
+                            verify-blob \
+                            --key "$COSIGN_PUB" \
+                            --bundle security/taskflow-
+                            api.cdx.bundle.json \
+                            security/taskflow-api.cdx.json
+                    '''
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'security/
+                    taskflow-api.cdx.json,security/
+                    taskflow-api.cdx.bundle.json',
+                        allowEmptyArchive: true
+                }
+            }
+        }
+          
+        stage('Policy Gate') {
+            steps {
+                sh '''
+                    docker run --rm \
+                        --volumes-from "$HOSTNAME" \
+                        --workdir "$PWD" \
+                        openpolicyagent/opa:1.0.0 \
+                        eval \
+                        --fail-defined \
+                        --format pretty \
+                        --data policy/security.rego \
+                        --input backend/audit.json \
+                        'data.taskflow.security.deny[_]'
+                '''
+            }
+        }
+
         stage('SonarQube Analysis') {
                 steps {
                 dir('backend') {

@@ -4,6 +4,7 @@
 .env.*.local
 *.pem
 *.key
+security/cosign.key
 
 # Dependencies
 node_modules/
