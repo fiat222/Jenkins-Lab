@@ -67,7 +67,7 @@ pipeline {
                     set +e
                     (
                         cd backend
-                        npx eslint --plugin security src/ \
+                        npx eslint --plugin security --ext .ts src/ \
                         --format @microsoft/eslint-formatter-sarif \
                         --output-file ../security/eslint.sarif
                     )
