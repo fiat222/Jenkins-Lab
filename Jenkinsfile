@@ -153,6 +153,7 @@ pipeline {
                             --volumes-from "$HOSTNAME" \
                             --workdir "$PWD" \
                             --env COSIGN_PASSWORD \
+                            --env HOME=/tmp \
                             ghcr.io/sigstore/cosign/cosign:v3.0.2 \
                             sign-blob --yes \
                             --key "$COSIGN_KEY" \
@@ -163,6 +164,7 @@ pipeline {
                             --user "$(id -u):$(id -g)" \
                             --volumes-from "$HOSTNAME" \
                             --workdir "$PWD" \
+                            --env HOME=/tmp \
                             ghcr.io/sigstore/cosign/cosign:v3.0.2 \
                             verify-blob \
                             --key "$COSIGN_PUB" \
