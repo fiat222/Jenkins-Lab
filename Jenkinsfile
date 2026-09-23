@@ -23,6 +23,28 @@ pipeline {
     }
 
     stages {
+	stage('Secrets Detection') {
+      	    steps {
+          	sh '''
+              	    mkdir -p security
+              	    docker run --rm \
+                    --volumes-from "$HOSTNAME" \
+                    --workdir "$PWD" \
+                    zricethezav/gitleaks:8.21.2 \
+                    detect \
+                    --source . \
+                    --log-opts="--all" \
+                    --report-format json \
+                    --report-path security/gitleaks.json
+          	'''
+      	    }
+      	    post {
+          	always {
+              	    archiveArtifacts artifacts: 'security/gitleaks.json', allowEmptyArchive: true
+          	}
+      	    }
+  	}
+
         stage('Install') {
             steps { dir('backend') { sh 'npm ci' } }
         }
