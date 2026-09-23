@@ -30,7 +30,7 @@ pipeline {
               	    docker run --rm \
                     --volumes-from "$HOSTNAME" \
                     --workdir "$PWD" \
-                    zricethezav/gitleaks:8.21.2 \
+                    zricethezav/gitleaks:v8.21.2 \
                     detect \
                     --source . \
                     --log-opts="--all" \
