@@ -149,6 +149,7 @@ pipeline {
                 ]) {
                     sh '''
                         docker run --rm \
+                            --user "$(id -u):$(id -g)" \
                             --volumes-from "$HOSTNAME" \
                             --workdir "$PWD" \
                             --env COSIGN_PASSWORD \
@@ -159,6 +160,7 @@ pipeline {
                             security/taskflow-api.cdx.json
 
                         docker run --rm \
+                            --user "$(id -u):$(id -g)" \
                             --volumes-from "$HOSTNAME" \
                             --workdir "$PWD" \
                             ghcr.io/sigstore/cosign/cosign:v3.0.2 \
