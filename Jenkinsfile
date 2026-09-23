@@ -118,8 +118,7 @@ pipeline {
 
                         echo "npm audit: critical=${critical}, high=${high}, moderate=${moderate}, low=${low}"
                         if (critical > 0) {
-                            echo "Critical vulnerabilities found; Policy Gate will
-                            decide the build result"
+                            echo 'Critical vulnerabilities found; Policy Gate will decide the build result'
                         }
                         if (high > 0 || moderate > 0 || low > 0) {
                             echo 'SCA warning: vulnerabilities found, but no Critical issues'
