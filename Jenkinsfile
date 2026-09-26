@@ -264,6 +264,67 @@ pipeline {
             }
         }
 
+        stage('Build Image') {
+            steps {
+                script {
+                    env.IMAGE_TAG = "localhost:5001/taskflow-api:${env.GIT_COMMIT.take(7)}"
+                }
+                sh "docker build -t ${env.IMAGE_TAG} backend"
+                sh "docker push ${env.IMAGE_TAG}"
+            }
+        }
+
+        stage('Container Scan') {
+            steps {
+                sh """
+                    docker run --rm \
+                      -v /var/run/docker.sock:/var/run/docker.sock \
+                      --volumes-from "\$HOSTNAME" \
+                      aquasec/trivy image \
+                      --exit-code 1 --severity HIGH,CRITICAL \
+                      --format sarif -o "\$PWD/trivy-taskflow-api.sarif" \
+                      ${env.IMAGE_TAG}
+                """
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'trivy-taskflow-api.sarif', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Blue/Green Deploy') {
+            steps {
+                withCredentials([file(credentialsId: 'kind-kubeconfig', variable: 'KUBECONFIG')]) {
+                    script {
+                        env.CURRENT_COLOR = sh(
+                            script: "kubectl get svc taskflow -o jsonpath='{.spec.selector.color}'",
+                            returnStdout: true
+                        ).trim()
+                        env.NEXT_COLOR = env.CURRENT_COLOR == 'blue' ? 'green' : 'blue'
+
+                        sh "kubectl set image deployment/taskflow-${env.NEXT_COLOR} app=${env.IMAGE_TAG}"
+                        sh "kubectl rollout status deployment/taskflow-${env.NEXT_COLOR} --timeout=120s"
+
+                        // smoke test the new pods directly, bypassing the main Service
+                        sh "kubectl run smoke-${BUILD_NUMBER} --rm -i --restart=Never --image=curlimages/curl -- curl -sf http://taskflow-${env.NEXT_COLOR}:8080/health/live"
+
+                        sh "kubectl patch svc taskflow -p '{\"spec\":{\"selector\":{\"color\":\"${env.NEXT_COLOR}\"}}}'"
+                        echo "Switched traffic from ${env.CURRENT_COLOR} to ${env.NEXT_COLOR}"
+                    }
+                }
+            }
+            post {
+                failure {
+                    withCredentials([file(credentialsId: 'kind-kubeconfig', variable: 'KUBECONFIG')]) {
+                        sh "kubectl patch svc taskflow -p '{\"spec\":{\"selector\":{\"color\":\"${env.CURRENT_COLOR}\"}}}'"
+                        sh "kubectl rollout undo deployment/taskflow-${env.NEXT_COLOR} || true"
+                        echo "ROLLBACK: traffic kept on ${env.CURRENT_COLOR}"
+                    }
+                }
+            }
+        }
+
         stage('Deploy - Staging') {
             when { branch 'develop' }
             steps { sh 'echo deploying to staging...' }

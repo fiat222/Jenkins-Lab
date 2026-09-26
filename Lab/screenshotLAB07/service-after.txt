@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"v1","kind":"Service","metadata":{"annotations":{},"name":"taskflow","namespace":"default"},"spec":{"ports":[{"name":"http","port":80,"targetPort":3000}],"selector":{"app":"taskflow","version":"blue"},"type":"ClusterIP"}}
+  creationTimestamp: "2026-09-25T20:03:01Z"
+  name: taskflow
+  namespace: default
+  resourceVersion: "1800"
+  uid: f578dc30-a9fa-4a2b-a4ae-0f55fc111f3e
+spec:
+  clusterIP: 10.96.43.144
+  clusterIPs:
+  - 10.96.43.144
+  internalTrafficPolicy: Cluster
+  ipFamilies:
+  - IPv4
+  ipFamilyPolicy: SingleStack
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 3000
+  selector:
+    app: taskflow
+    version: green
+  sessionAffinity: None
+  type: ClusterIP
+status:
+  loadBalancer: {}

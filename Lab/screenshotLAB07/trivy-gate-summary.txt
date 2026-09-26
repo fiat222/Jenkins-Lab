@@ -1,0 +1,18 @@
+Lab 07 - Trivy vulnerability gate
+
+Scanned image content: taskflow-api:lab07-20260926
+Image config digest: sha256:834c787c68f1d373add1edc7c9bab1def855f9899ddce935938d13b059bfed68
+Equivalent single-platform deploy tag: taskflow-api:lab07-f7f5ca277193-single
+Scanner: Trivy 0.63.0
+Gate threshold: HIGH,CRITICAL
+Gate result: BLOCKED (Trivy process exit code 1)
+
+Finding counts from the SARIF report:
+CRITICAL: 2
+HIGH: 28
+MEDIUM: 23
+LOW: 3
+TOTAL: 56
+
+SARIF: trivy-taskflow-api.sarif
+Full scanner table: trivy-gate-console.txt

@@ -1,0 +1,66 @@
+upstream backend {
+    least_conn;
+    server nest-1:3000 max_fails=3 fail_timeout=10s;
+    server nest-2:3000 max_fails=3 fail_timeout=10s;
+    server nest-3:3000 max_fails=3 fail_timeout=10s;
+    keepalive 32;
+}
+
+map $http_upgrade $connection_upgrade {
+    default upgrade;
+    ''      close;
+}
+
+server {
+    listen 8080 default_server;
+    server_name _;
+
+    server_tokens off;
+
+    add_header Access-Control-Allow-Origin '*' always;
+    add_header Access-Control-Allow-Methods 'GET, POST, PUT, PATCH, DELETE, OPTIONS' always;
+    add_header Access-Control-Allow-Headers 'Content-Type, Authorization, X-Requested-With' always;
+    add_header Access-Control-Max-Age 86400 always;
+
+    if ($request_method = OPTIONS) {
+        return 204;
+    }
+
+    # Keep the OWASP CRS image healthcheck endpoint when overriding its vhost template.
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "OK";
+    }
+
+    location = /health {
+        proxy_pass http://backend/health;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        access_log off;
+    }
+
+    location /socket.io/ {
+        proxy_pass http://backend;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection $connection_upgrade;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 86400;
+    }
+
+    location / {
+        proxy_pass http://backend;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
