@@ -256,7 +256,8 @@ pipeline {
                         // JDK 21 is provided by the CI image, avoiding agent tool-cache permissions.
                         withEnv(['JAVA_HOME=/opt/java/openjdk', 'PATH+JAVA=/opt/java/openjdk/bin']) {
                             withSonarQubeEnv('SonarQube') {
-                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=. -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
+                            // Spec files are tests, not sources; otherwise editing a test counts as uncovered new code.
+                            sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectKey=taskflow-api -Dsonar.sources=src -Dsonar.tests=src '-Dsonar.test.inclusions=**/*.spec.ts' '-Dsonar.exclusions=**/*.spec.ts' -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info"
                             }
                         }
                             }
