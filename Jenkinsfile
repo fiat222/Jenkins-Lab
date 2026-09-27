@@ -10,7 +10,7 @@ def terraform(String args, Map opts = [:]) {
                 docker run --rm --network jenkins-net \\
                   --volumes-from "\$HOSTNAME" --user "\$(id -u):\$(id -g)" \\
                   -v /var/run/docker.sock:/var/run/docker.sock \\
-                  -e HOME=/tmp -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY \\
+                  -e HOME=/tmp -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ${opts.dataDir ? "-e TF_DATA_DIR=${opts.dataDir}" : ''} \\
                   -w "\$PWD/infra/terraform" \\
                   hashicorp/terraform:1.15 ${args}
             """,
@@ -391,8 +391,9 @@ pipeline {
                         stage('Terraform Validate') {
                             steps {
                                 script {
-                                    terraform 'init -backend=false -input=false -no-color'
-                                    terraform 'validate -no-color'
+                                    // A separate data dir keeps validation away from the S3 backend a previous plan configured.
+                                    terraform('init -backend=false -input=false -no-color', [dataDir: '.terraform-validate'])
+                                    terraform('validate -no-color', [dataDir: '.terraform-validate'])
                                     terraform 'fmt -check -recursive'
                                 }
                             }

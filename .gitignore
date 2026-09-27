@@ -51,3 +51,4 @@ Thumbs.db
 tfplan
 tfplan.txt
 infra/ansible/inventory.ini
+.terraform-validate/
