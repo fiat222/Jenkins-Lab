@@ -223,7 +223,7 @@ pipeline {
 
         stage('E2E') {
             environment {
-                E2E_BASE_URL = 'http://e2e-nginx'
+                E2E_BASE_URL = 'http://e2e-nginx:8080'
             }
             steps {
                 sh '''

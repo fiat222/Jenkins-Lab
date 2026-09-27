@@ -24,9 +24,13 @@ services:
   # The E2E suite reaches nginx by its Docker DNS name; no host ports are needed.
   nginx:
     container_name: e2e-nginx
+    # A workspace bind mount cannot be resolved by the host daemon from
+    # Jenkins' container, so the WAF vhost template is baked into the image.
+    image: taskflow-e2e-nginx:local
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile.waf
     ports: !reset []
-    # nginx/Dockerfile already copies the config into the image. A workspace
-    # bind mount cannot be resolved by the host daemon from Jenkins' container.
     volumes: !reset []
 
   # pgAdmin is not part of the API test environment.
