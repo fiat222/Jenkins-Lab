@@ -287,12 +287,14 @@ pipeline {
                 stage('E2E') {
                     environment {
                         E2E_BASE_URL = 'http://e2e-nginx:8080'
+                        // BUILD_TAG carries %2F for branches like feature/x, which Docker rejects in a tag.
+                        E2E_IMAGE = "taskflow-e2e:${env.BUILD_TAG.replaceAll('[^A-Za-z0-9_.-]', '-')}"
                     }
                     steps {
                         sh '''
                             # Compose joins the external jenkins-net; inside this pod's daemon it must exist first.
                             docker network inspect jenkins-net >/dev/null 2>&1 || docker network create jenkins-net
-                            docker build --tag "taskflow-e2e:${BUILD_TAG}" --file ci/playwright/Dockerfile ci/playwright
+                            docker build --tag "${E2E_IMAGE}" --file ci/playwright/Dockerfile ci/playwright
                             docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e down -v --remove-orphans || true
                             docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e up -d --build postgres-primary redis nest-1 nest-2 nest-3 nginx
 
@@ -309,7 +311,7 @@ pipeline {
                               --user "$(id --user):$(id --group)" \\
                               --workdir "$PWD/e2e" \\
                               --env E2E_BASE_URL \\
-                              "taskflow-e2e:${BUILD_TAG}" \\
+                              "${E2E_IMAGE}" \\
                               sh -c 'npm ci && npm run test:e2e'
                         '''
                     }
@@ -317,7 +319,7 @@ pipeline {
                         always {
                             sh 'docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e down -v --remove-orphans'
                             // Each build tags its own runner image; untag it so they do not pile up (3.5 GB each).
-                            sh 'docker rmi "taskflow-e2e:${BUILD_TAG}" || true'
+                            sh 'docker rmi "${E2E_IMAGE}" || true'
                             junit testResults: 'e2e/reports/junit.xml', allowEmptyResults: true
                             publishHTML(target: [
                                 reportDir: 'e2e/playwright-report',
