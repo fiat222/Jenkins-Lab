@@ -1,0 +1,11 @@
+# Image cache for the delivery pod's Docker daemon; apply once with kubectl.
+# One daemon may own /var/lib/docker at a time, so the pipeline disables concurrent builds.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: delivery-docker-cache
+spec:
+  accessModes: ['ReadWriteOnce']
+  resources:
+    requests:
+      storage: 20Gi

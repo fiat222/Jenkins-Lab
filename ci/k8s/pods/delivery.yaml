@@ -1,0 +1,46 @@
+# Replaces the static linux-build agent: the pod brings its own Docker daemon instead of
+# borrowing a host socket, so nothing outside Kubernetes has to be provisioned by hand.
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: ci
+      image: localhost:5001/taskflow-ci:1
+      command: ['cat']
+      tty: true
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 0
+      volumeMounts:
+        - { name: dind-socket, mountPath: /run/dind }
+      env:
+        - { name: DOCKER_HOST, value: 'unix:///run/dind/docker.sock' }
+      resources:
+        requests: { memory: 512Mi, cpu: '500m' }
+        limits: { memory: 2Gi }
+    - name: dind
+      image: docker:27-dind
+      securityContext:
+        privileged: true
+      # Unix sockets only: the shared one serves the ci container (group 0 = its gid), the default
+      # one lets containers that mount /var/run/docker.sock (Trivy, Terraform, Ansible) reach this daemon.
+      args: ['dockerd', '--host=unix:///run/dind/docker.sock', '--host=unix:///var/run/docker.sock', '--group=0']
+      resources:
+        requests: { memory: 1Gi, cpu: '1' }
+        limits: { memory: 5Gi }
+      volumeMounts:
+        - { name: docker-cache, mountPath: /var/lib/docker }
+        - { name: dind-socket, mountPath: /run/dind }
+    # Docker treats localhost registries as insecure-allowed, so forwarding localhost:5001 keeps
+    # the same image names the kind nodes pull (their containerd maps localhost:5001 the same way).
+    - name: registry-proxy
+      image: alpine/socat:1.8.0.3
+      args: ['tcp-listen:5001,fork,reuseaddr', 'tcp:lab07-registry:5000']
+      resources:
+        limits: { memory: 64Mi }
+  volumes:
+    - name: dind-socket
+      emptyDir: {}
+    - name: docker-cache
+      persistentVolumeClaim:
+        claimName: delivery-docker-cache

@@ -1,4 +1,4 @@
-// Terraform runs as a sibling container sharing this workspace and reaching LocalStack on jenkins-net.
+// Terraform runs as a sibling container on the pod's Docker daemon, sharing the agent dir.
 def terraform(String args, Map opts = [:]) {
     def result
     // `-e NAME` with no value forwards the bound credential without writing it into the command.
@@ -7,8 +7,8 @@ def terraform(String args, Map opts = [:]) {
                                       passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
         result = sh(
             script: """
-                docker run --rm --network jenkins-net \\
-                  --volumes-from "\$HOSTNAME" --user "\$(id -u):\$(id -g)" \\
+                docker run --rm \\
+                  -v /home/jenkins/agent:/home/jenkins/agent --user "\$(id -u):\$(id -g)" \\
                   -v /var/run/docker.sock:/var/run/docker.sock \\
                   -e HOME=/tmp -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY ${opts.dataDir ? "-e TF_DATA_DIR=${opts.dataDir}" : ''} \\
                   -w "\$PWD/infra/terraform" \\
@@ -30,7 +30,9 @@ pipeline {
     }
 
     options {
-        timeout(time: 30, unit: 'MINUTES')
+        timeout(time: 45, unit: 'MINUTES')
+        // The delivery pod's Docker cache is a single RWO volume; two daemons on it would corrupt it.
+        disableConcurrentBuilds()
         // A hung npm install or test run must not hold the executor forever
     }
 
@@ -164,18 +166,13 @@ pipeline {
             }
         }
 
-        // Scanners, image builds, deploys and IaC drive Docker through the agent's socket.
+        // Scanners, image builds, deploys and IaC run on a pod that brings its own Docker daemon (dind).
         stage('Security, Delivery & IaC') {
             agent {
-                dockerfile {
-                    filename 'Dockerfile'
-                    dir 'ci'
-                    label 'linux-build'
-                    // Build containers must share SonarQube's network for DNS resolution.
-                    // Docker Pipeline first supplies -u 1000:1000. The agent mounts
-                    // its daemon socket as root:root (0660), so this final user value
-                    // keeps UID 1000 while granting the required socket group.
-                    args '--network jenkins-net -u 1000:0'
+                kubernetes {
+                    cloud 'kind'
+                    yamlFile 'ci/k8s/pods/delivery.yaml'
+                    defaultContainer 'ci'
                 }
             }
             stages {
@@ -184,7 +181,7 @@ pipeline {
                         sh '''
                             mkdir -p security
                             docker run --rm \
-                                --volumes-from "$HOSTNAME" \
+                                -v /home/jenkins/agent:/home/jenkins/agent \
                                 --workdir "$PWD" \
                                 anchore/syft:v1.42.3 \
                                 scan dir:backend \
@@ -199,7 +196,7 @@ pipeline {
                             sh '''
                                 docker run --rm \
                                     --user "$(id -u):$(id -g)" \
-                                    --volumes-from "$HOSTNAME" \
+                                    -v /home/jenkins/agent:/home/jenkins/agent \
                                     --workdir "$PWD" \
                                     --env COSIGN_PASSWORD \
                                     --env HOME=/tmp \
@@ -211,7 +208,7 @@ pipeline {
 
                                 docker run --rm \
                                     --user "$(id -u):$(id -g)" \
-                                    --volumes-from "$HOSTNAME" \
+                                    -v /home/jenkins/agent:/home/jenkins/agent \
                                     --workdir "$PWD" \
                                     --env HOME=/tmp \
                                     ghcr.io/sigstore/cosign/cosign:v3.0.2 \
@@ -235,7 +232,7 @@ pipeline {
                         unstash 'npm-audit'
                         sh '''
                             docker run --rm \
-                                --volumes-from "$HOSTNAME" \
+                                -v /home/jenkins/agent:/home/jenkins/agent \
                                 --workdir "$PWD" \
                                 openpolicyagent/opa:1.0.0 \
                                 eval \
@@ -279,19 +276,22 @@ pipeline {
                     }
                     steps {
                         sh '''
+                            # Compose joins the external jenkins-net; inside this pod's daemon it must exist first.
+                            docker network inspect jenkins-net >/dev/null 2>&1 || docker network create jenkins-net
                             docker build --tag "taskflow-e2e:${BUILD_TAG}" --file ci/playwright/Dockerfile ci/playwright
                             docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e down -v --remove-orphans || true
                             docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e up -d --build postgres-primary redis nest-1 nest-2 nest-3 nginx
 
+                            # e2e-nginx only resolves on the daemon's jenkins-net, not from this container.
+                            probe() { docker run --rm --network jenkins-net curlimages/curl --fail --silent --show-error "$E2E_BASE_URL/health/ready"; }
                             for attempt in $(seq 1 30); do
-                              curl --fail --silent --show-error "$E2E_BASE_URL/health/ready" && break
+                              probe && break
                               sleep 2
                             done
-
-                            curl --fail --silent --show-error "$E2E_BASE_URL/health/ready"
+                            probe
                             docker run --rm \\
                               --network jenkins-net \\
-                              --volumes-from "$HOSTNAME" \\
+                              -v /home/jenkins/agent:/home/jenkins/agent \\
                               --user "$(id --user):$(id --group)" \\
                               --workdir "$PWD/e2e" \\
                               --env E2E_BASE_URL \\
@@ -333,7 +333,7 @@ pipeline {
                         sh """
                             docker run --rm \
                               -v /var/run/docker.sock:/var/run/docker.sock \
-                              --volumes-from "\$HOSTNAME" \
+                              -v /home/jenkins/agent:/home/jenkins/agent \
                               aquasec/trivy image \
                               --exit-code 1 --severity HIGH,CRITICAL \
                               --format sarif -o "\$PWD/trivy-taskflow-api.sarif" \
@@ -401,7 +401,7 @@ pipeline {
                         stage('Ansible Lint') {
                             steps {
                                 sh 'docker build -t taskflow-ansible:ci ci/ansible'
-                                sh 'docker run --rm --volumes-from "$HOSTNAME" --user "$(id -u):$(id -g)" -w "$PWD" taskflow-ansible:ci ansible-lint --offline infra/ansible/playbook.yml'
+                                sh 'docker run --rm -v /home/jenkins/agent:/home/jenkins/agent --user "$(id -u):$(id -g)" -w "$PWD" taskflow-ansible:ci ansible-lint --offline infra/ansible/playbook.yml'
                             }
                         }
                     }
@@ -412,9 +412,9 @@ pipeline {
                         sh '''
                             mkdir -p security
                             rc=0
-                            docker run --rm --volumes-from "$HOSTNAME" --user "$(id -u):$(id -g)" -e HOME=/tmp \
+                            docker run --rm -v /home/jenkins/agent:/home/jenkins/agent --user "$(id -u):$(id -g)" -e HOME=/tmp \
                               aquasec/tfsec:latest "$PWD/infra/terraform" --no-color --out "$PWD/security/tfsec.txt" || rc=1
-                            docker run --rm --volumes-from "$HOSTNAME" --user "$(id -u):$(id -g)" -e HOME=/tmp \
+                            docker run --rm -v /home/jenkins/agent:/home/jenkins/agent --user "$(id -u):$(id -g)" -e HOME=/tmp \
                               bridgecrew/checkov:latest -d "$PWD/infra/terraform" --framework terraform --compact --quiet --skip-download \
                               > security/checkov.txt 2>&1 || rc=1
                             cat security/checkov.txt
@@ -431,12 +431,13 @@ pipeline {
                 stage('Terraform Plan') {
                     when { branch 'main' }
                     steps {
+                        sh 'docker network inspect jenkins-net >/dev/null 2>&1 || docker network create jenkins-net'
                         // LocalStack community keeps no data across restarts, so recreate the state bucket if needed.
                         withCredentials([usernamePassword(credentialsId: 'localstack-aws',
                                                           usernameVariable: 'AWS_ACCESS_KEY_ID',
                                                           passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
                             sh '''
-                                docker run --rm --network jenkins-net --entrypoint sh \
+                                docker run --rm --entrypoint sh \
                                   -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=us-east-1 \
                                   amazon/aws-cli -c 'aws --endpoint-url http://localstack:4566 s3api head-bucket --bucket taskflow-tfstate \
                                     || aws --endpoint-url http://localstack:4566 s3 mb s3://taskflow-tfstate'
@@ -497,8 +498,8 @@ pipeline {
                                       text: "[taskflow]\n${host} ansible_connection=community.docker.docker_api\n"
                         }
                         sh """
-                            docker run --rm --network jenkins-net \\
-                              --volumes-from "\$HOSTNAME" --user "\$(id -u):\$(id -g)" \\
+                            docker run --rm \\
+                              -v /home/jenkins/agent:/home/jenkins/agent --user "\$(id -u):\$(id -g)" \\
                               -v /var/run/docker.sock:/var/run/docker.sock \\
                               -e TASKFLOW_IMAGE=${env.IMAGE_TAG} -w "\$PWD/infra/ansible" \\
                               taskflow-ansible:ci ansible-playbook -i inventory.ini playbook.yml
