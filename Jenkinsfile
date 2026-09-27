@@ -1,17 +1,24 @@
 // Terraform runs as a sibling container sharing this workspace and reaching LocalStack on jenkins-net.
 def terraform(String args, Map opts = [:]) {
-    return sh(
-        script: """
-            docker run --rm --network jenkins-net \\
-              --volumes-from "\$HOSTNAME" --user "\$(id -u):\$(id -g)" \\
-              -v /var/run/docker.sock:/var/run/docker.sock \\
-              -e HOME=/tmp -e AWS_ACCESS_KEY_ID=test -e AWS_SECRET_ACCESS_KEY=test \\
-              -w "\$PWD/infra/terraform" \\
-              hashicorp/terraform:1.15 ${args}
-        """,
-        returnStdout: opts.stdout ?: false,
-        returnStatus: opts.status ?: false
-    )
+    def result
+    // `-e NAME` with no value forwards the bound credential without writing it into the command.
+    withCredentials([usernamePassword(credentialsId: 'localstack-aws',
+                                      usernameVariable: 'AWS_ACCESS_KEY_ID',
+                                      passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+        result = sh(
+            script: """
+                docker run --rm --network jenkins-net \\
+                  --volumes-from "\$HOSTNAME" --user "\$(id -u):\$(id -g)" \\
+                  -v /var/run/docker.sock:/var/run/docker.sock \\
+                  -e HOME=/tmp -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY \\
+                  -w "\$PWD/infra/terraform" \\
+                  hashicorp/terraform:1.15 ${args}
+            """,
+            returnStdout: opts.stdout ?: false,
+            returnStatus: opts.status ?: false
+        )
+    }
+    return result
 }
 
 pipeline {
@@ -295,6 +302,8 @@ pipeline {
                     post {
                         always {
                             sh 'docker compose --env-file .env.example -f docker-compose.yml -f docker-compose.e2e.yml --project-name auto-chess-e2e down -v --remove-orphans'
+                            // Each build tags its own runner image; untag it so they do not pile up (3.5 GB each).
+                            sh 'docker rmi "taskflow-e2e:${BUILD_TAG}" || true'
                             junit testResults: 'e2e/reports/junit.xml', allowEmptyResults: true
                             publishHTML(target: [
                                 reportDir: 'e2e/playwright-report',
@@ -422,12 +431,16 @@ pipeline {
                     when { branch 'main' }
                     steps {
                         // LocalStack community keeps no data across restarts, so recreate the state bucket if needed.
-                        sh '''
-                            docker run --rm --network jenkins-net --entrypoint sh \
-                              -e AWS_ACCESS_KEY_ID=test -e AWS_SECRET_ACCESS_KEY=test -e AWS_DEFAULT_REGION=us-east-1 \
-                              amazon/aws-cli -c 'aws --endpoint-url http://localstack:4566 s3api head-bucket --bucket taskflow-tfstate \
-                                || aws --endpoint-url http://localstack:4566 s3 mb s3://taskflow-tfstate'
-                        '''
+                        withCredentials([usernamePassword(credentialsId: 'localstack-aws',
+                                                          usernameVariable: 'AWS_ACCESS_KEY_ID',
+                                                          passwordVariable: 'AWS_SECRET_ACCESS_KEY')]) {
+                            sh '''
+                                docker run --rm --network jenkins-net --entrypoint sh \
+                                  -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e AWS_DEFAULT_REGION=us-east-1 \
+                                  amazon/aws-cli -c 'aws --endpoint-url http://localstack:4566 s3api head-bucket --bucket taskflow-tfstate \
+                                    || aws --endpoint-url http://localstack:4566 s3 mb s3://taskflow-tfstate'
+                            '''
+                        }
                         script {
                             terraform 'init -reconfigure -input=false -no-color'
                             def rc = terraform('plan -input=false -no-color -detailed-exitcode -out=tfplan', [status: true])
