@@ -303,8 +303,7 @@ pipeline {
                         ).trim()
                         env.NEXT_COLOR = env.CURRENT_COLOR == 'blue' ? 'green' : 'blue'
 
-                        // LAB07 ROLLBACK DEMO — revert this line after capturing evidence
-                        sh "kubectl set image deployment/taskflow-${env.NEXT_COLOR} app=localhost:5001/taskflow-api:broken"
+                        sh "kubectl set image deployment/taskflow-${env.NEXT_COLOR} app=${env.IMAGE_TAG}"
                         sh "kubectl rollout status deployment/taskflow-${env.NEXT_COLOR} --timeout=120s"
 
                         // smoke test the new pods directly, bypassing the main Service
