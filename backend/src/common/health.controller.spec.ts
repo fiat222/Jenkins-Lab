@@ -20,6 +20,20 @@ describe('HealthController (P3-BE-03)', () => {
     expect(c.live()).toMatchObject({ status: 'live' });
   });
 
+  it('/health/live reports the build version from APP_VERSION', () => {
+    const c = makeController({ pg: true, redisPing: async () => 'PONG' });
+    const previous = process.env.APP_VERSION;
+    try {
+      process.env.APP_VERSION = 'abc1234';
+      expect(c.live().version).toBe('abc1234');
+      delete process.env.APP_VERSION;
+      expect(c.live().version).toBe('dev');
+    } finally {
+      if (previous === undefined) delete process.env.APP_VERSION;
+      else process.env.APP_VERSION = previous;
+    }
+  });
+
   it('/health/ready returns 200 when Postgres + Redis are up', async () => {
     const c = makeController({ pg: true, redisPing: async () => 'PONG' });
     await expect(c.ready()).resolves.toEqual({ status: 'ready' });

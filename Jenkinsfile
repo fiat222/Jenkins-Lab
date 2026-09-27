@@ -1,3 +1,17 @@
+// The recipient is a Jenkins credential so this public repo never carries an address.
+def notifyTeam(String status) {
+    withCredentials([string(credentialsId: 'notify-email', variable: 'NOTIFY_TO')]) {
+        mail to: env.NOTIFY_TO,
+             subject: "[${status}] ${env.JOB_NAME} #${env.BUILD_NUMBER} (${env.BRANCH_NAME})",
+             body: """Pipeline: ${env.JOB_NAME}
+Branch:   ${env.BRANCH_NAME}
+Build:    #${env.BUILD_NUMBER}
+Result:   ${status}
+URL:      ${env.BUILD_URL}
+"""
+    }
+}
+
 // Terraform runs as a sibling container on the pod's Docker daemon, sharing the agent dir.
 def terraform(String args, Map opts = [:]) {
     def result
@@ -323,7 +337,7 @@ pipeline {
                         script {
                             env.IMAGE_TAG = "localhost:5001/taskflow-api:${env.GIT_COMMIT.take(7)}"
                         }
-                        sh "docker build -t ${env.IMAGE_TAG} backend"
+                        sh "docker build --build-arg APP_VERSION=${env.GIT_COMMIT.take(7)} -t ${env.IMAGE_TAG} backend"
                         sh "docker push ${env.IMAGE_TAG}"
                     }
                 }
@@ -550,7 +564,7 @@ pipeline {
     }
 
     post {
-        success { echo "${env.APP_NAME} passed on ${env.NODE_ENV}" }
-        failure { echo "Failed at stage: ${env.STAGE_NAME}" }
+        success { notifyTeam('SUCCESS') }
+        failure { notifyTeam('FAILURE') }
     }
 }

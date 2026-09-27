@@ -31,7 +31,12 @@ export class HealthController {
   @Get('live')
   @HttpCode(200)
   live() {
-    return { status: 'live', instance: process.env.HOSTNAME ?? 'local' };
+    return {
+      status: 'live',
+      instance: process.env.HOSTNAME ?? 'local',
+      // Commit the running image was built from, so clients can show which API build they reach.
+      version: buildVersion(),
+    };
   }
 
   /**
@@ -77,4 +82,9 @@ export class HealthController {
     }
     return { ok: postgres && redis, postgres, redis, redisError };
   }
+}
+
+// Parses the build number out of APP_VERSION.
+function buildVersion(): number {
+  return process.env.APP_VERSION ?? 'dev';
 }
