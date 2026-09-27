@@ -11,6 +11,10 @@ module.exports = {
     '!src/game/**/*.smoke.ts',
     '!src/game/fixtures/**',
     '!src/game/index.ts',
+    // Shared HTTP plumbing has its own specs; without it SonarQube saw edits here as uncovered new code.
+    'src/common/**/*.ts',
+    '!src/common/**/*.spec.ts',
+    '!src/common/**/*.module.ts',
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov', 'cobertura'],
