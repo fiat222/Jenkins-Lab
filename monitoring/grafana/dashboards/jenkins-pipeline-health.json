@@ -43,14 +43,14 @@
     {
       "id": 2,
       "title": "p95 build duration",
-      "description": "95th percentile of build execution time; the SLO target is 6 minutes.",
+      "description": "95th percentile of time from entering the queue to completion (what Jenkins shows as build duration); the SLO target is 6 minutes.",
       "type": "timeseries",
       "gridPos": { "x": 8, "y": 0, "w": 8, "h": 8 },
       "datasource": { "type": "prometheus", "uid": "prometheus" },
       "targets": [
         {
           "refId": "A",
-          "expr": "jenkins_job_building_duration{quantile=\"0.95\"}",
+          "expr": "jenkins_job_total_duration{quantile=\"0.95\"}",
           "legendFormat": "p95"
         }
       ],

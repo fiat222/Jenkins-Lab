@@ -1,0 +1,25 @@
+groups:
+  - name: jenkins-slo
+    rules:
+      # SLI: p95 of queue-to-completion time. "95% of builds finish under 6 minutes"
+      # holds exactly when this p95 is at or below 360s.
+      - record: jenkins:build_duration_seconds:p95
+        expr: jenkins_job_total_duration{quantile="0.95"}
+
+      - record: jenkins:slo_build_duration:met
+        expr: jenkins:build_duration_seconds:p95 <= bool 360
+
+      # Share of the rolling 7 days the SLO held; the objective is 1 (always met).
+      - record: jenkins:slo_build_duration:compliance_7d
+        expr: avg_over_time(jenkins:slo_build_duration:met[7d])
+
+      # Symptom of too little build capacity: work is queued AND recent builds waited >2 min.
+      # waiting_duration is recorded as items leave the queue, so pair it with a live backlog.
+      - alert: JenkinsQueueBacklog
+        expr: jenkins_queue_size_value > 0 and on() jenkins_job_waiting_duration{quantile="0.95"} > 120
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Jenkins build queue backlog exceeds 2 minutes"
+          description: "{{ $value }} build(s) queued while p95 queue wait has been above 2 minutes for 5 minutes."
