@@ -8,6 +8,12 @@ pipeline {
         string(name: 'HOLD_SECONDS', defaultValue: '180', description: 'How long each build occupies its pod')
     }
 
+    // A new job's first run has no parameters yet, so fall back to the defaults.
+    environment {
+        RUN_ID = "${params.RUN_ID ?: 'first-run'}"
+        HOLD_SECONDS = "${params.HOLD_SECONDS ?: '180'}"
+    }
+
     options {
         timeout(time: 30, unit: 'MINUTES')
     }
