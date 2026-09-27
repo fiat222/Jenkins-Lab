@@ -509,6 +509,32 @@ pipeline {
                     when { branch 'develop' }
                     steps { sh 'echo deploying to staging...' }
                 }
+                // Blocks the deploy when main has been unhealthy. Aborted and not-built runs are human
+                // decisions, not pipeline failures, so the rate counts only SUCCESS/UNSTABLE/FAILURE.
+                stage('Pipeline Health Gate') {
+                    when { branch 'main' }
+                    environment {
+                        HEALTH_MIN_RATE = '0.90'
+                        HEALTH_QUERY = '(count(default_jenkins_builds_build_result_ordinal{jenkins_job="taskflow-multibranch/main"} == 0) or vector(0)) / count(default_jenkins_builds_build_result_ordinal{jenkins_job="taskflow-multibranch/main"} <= 2)'
+                    }
+                    steps {
+                        script {
+                            def rate = sh(returnStdout: true, script: '''
+                                curl -sf --get http://prometheus:9090/api/v1/query --data-urlencode "query=$HEALTH_QUERY" \
+                                  | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>{const r=JSON.parse(s).data.result;console.log(r.length?r[0].value[1]:"none")})'
+                            ''').trim()
+                            // No verdict builds in the window means no evidence of health, so fail closed.
+                            if (rate == 'none' || rate == 'NaN') {
+                                error('Pipeline Health Gate: no completed main builds in Prometheus; refusing to deploy')
+                            }
+                            def pct = String.format('%.1f', rate.toDouble() * 100)
+                            echo "Pipeline Health Gate: main success rate over the last 20 builds = ${pct}% (minimum ${HEALTH_MIN_RATE.toDouble() * 100}%)"
+                            if (rate.toDouble() < HEALTH_MIN_RATE.toDouble()) {
+                                error("Pipeline Health Gate: success rate ${pct}% is below 90%; aborting production deploy")
+                            }
+                        }
+                    }
+                }
                 stage('Deploy - Production') {
                     when {
                         beforeInput true
