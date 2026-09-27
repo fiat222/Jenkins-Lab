@@ -176,9 +176,12 @@ describe('ws_rate_limit.lua — shared sliding-window counter (P1-BE-01)', () =>
   });
 
   it('counts every hit atomically and expires its bookkeeping keys', async () => {
-    expect(await redis.eval(src, 2, hits, sequence, 1000)).toBe(1);
-    expect(await redis.eval(src, 2, hits, sequence, 1000)).toBe(2);
-    expect(await redis.eval(src, 2, hits, sequence, 1000)).toBe(3);
+    // ioredis-mock's TIME joins rounded wall-clock seconds with hrtime micros, so it
+    // can jump ~2s between calls; a 1s window made this test flaky on slow runners.
+    const window = 60_000;
+    expect(await redis.eval(src, 2, hits, sequence, window)).toBe(1);
+    expect(await redis.eval(src, 2, hits, sequence, window)).toBe(2);
+    expect(await redis.eval(src, 2, hits, sequence, window)).toBe(3);
     expect(await redis.zcard(hits)).toBe(3);
     expect(await redis.pttl(hits)).toBeGreaterThan(0);
     expect(await redis.pttl(sequence)).toBeGreaterThan(0);
