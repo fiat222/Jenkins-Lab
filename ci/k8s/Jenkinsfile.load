@@ -1,0 +1,24 @@
+// Saturation job for Lab 09: each build holds one pod from the k8s-node template.
+pipeline {
+    agent { label 'k8s-node' }
+
+    parameters {
+        // Distinct values stop Jenkins from merging identical queued builds into one.
+        string(name: 'RUN_ID', defaultValue: 'manual', description: 'Unique id per triggered build')
+        string(name: 'HOLD_SECONDS', defaultValue: '150', description: 'How long each build occupies its pod')
+    }
+
+    options {
+        timeout(time: 30, unit: 'MINUTES')
+    }
+
+    stages {
+        stage('Hold pod') {
+            steps {
+                container('node') {
+                    sh 'echo "run ${RUN_ID} on $(hostname)"; node --version; sleep "${HOLD_SECONDS}"'
+                }
+            }
+        }
+    }
+}

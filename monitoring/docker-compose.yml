@@ -1,0 +1,41 @@
+name: jenkins-monitoring
+
+services:
+  prometheus:
+    image: prom/prometheus:v3.15.0
+    container_name: prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      # The pipeline SLO is measured over a rolling 7 days.
+      - --storage.tsdb.retention.time=8d
+      - --web.enable-lifecycle
+    volumes:
+      - ./prometheus:/etc/prometheus:ro
+      - prometheus_data:/prometheus
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+
+  grafana:
+    image: grafana/grafana:13.2.2
+    container_name: grafana
+    depends_on:
+      - prometheus
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    # 3000 is left for the Nest services in the main compose file.
+    ports:
+      - "3001:3000"
+    restart: unless-stopped
+
+volumes:
+  prometheus_data:
+  grafana_data:
+
+# Jenkins is reached by its container name on the pipeline network.
+networks:
+  default:
+    name: jenkins-net
+    external: true
