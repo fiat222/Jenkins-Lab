@@ -1,3 +1,19 @@
+// Terraform runs as a sibling container sharing this workspace and reaching LocalStack on jenkins-net.
+def terraform(String args, Map opts = [:]) {
+    return sh(
+        script: """
+            docker run --rm --network jenkins-net \\
+              --volumes-from "\$HOSTNAME" --user "\$(id -u):\$(id -g)" \\
+              -v /var/run/docker.sock:/var/run/docker.sock \\
+              -e HOME=/tmp -e AWS_ACCESS_KEY_ID=test -e AWS_SECRET_ACCESS_KEY=test \\
+              -w "\$PWD/infra/terraform" \\
+              hashicorp/terraform:1.15 ${args}
+        """,
+        returnStdout: opts.stdout ?: false,
+        returnStatus: opts.status ?: false
+    )
+}
+
 pipeline {
     agent {
         dockerfile {
@@ -18,7 +34,7 @@ pipeline {
     }
 
     options {
-        timeout(time: 10, unit: 'MINUTES')
+        timeout(time: 30, unit: 'MINUTES')
         // A hung npm install or test run must not hold the executor forever
     }
 
@@ -329,6 +345,121 @@ pipeline {
                         }
                     }
                 }
+            }
+        }
+
+        stage('IaC Lint & Validate') {
+            parallel {
+                stage('Terraform Validate') {
+                    steps {
+                        script {
+                            terraform 'init -backend=false -input=false -no-color'
+                            terraform 'validate -no-color'
+                            terraform 'fmt -check -recursive'
+                        }
+                    }
+                }
+                stage('Ansible Lint') {
+                    steps {
+                        sh 'docker build -t taskflow-ansible:ci ci/ansible'
+                        sh 'docker run --rm --volumes-from "$HOSTNAME" --user "$(id -u):$(id -g)" -w "$PWD" taskflow-ansible:ci ansible-lint --offline infra/ansible/playbook.yml'
+                    }
+                }
+            }
+        }
+
+        stage('IaC Security Scan') {
+            steps {
+                sh '''
+                    mkdir -p security
+                    rc=0
+                    docker run --rm --volumes-from "$HOSTNAME" --user "$(id -u):$(id -g)" -e HOME=/tmp \
+                      aquasec/tfsec:latest "$PWD/infra/terraform" --no-color --out "$PWD/security/tfsec.txt" || rc=1
+                    docker run --rm --volumes-from "$HOSTNAME" --user "$(id -u):$(id -g)" -e HOME=/tmp \
+                      bridgecrew/checkov:latest -d "$PWD/infra/terraform" --framework terraform --compact --quiet --skip-download \
+                      > security/checkov.txt 2>&1 || rc=1
+                    cat security/checkov.txt
+                    exit $rc
+                '''
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'security/tfsec.txt, security/checkov.txt', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Terraform Plan') {
+            when { branch 'main' }
+            steps {
+                // LocalStack community keeps no data across restarts, so recreate the state bucket if needed.
+                sh '''
+                    docker run --rm --network jenkins-net --entrypoint sh \
+                      -e AWS_ACCESS_KEY_ID=test -e AWS_SECRET_ACCESS_KEY=test -e AWS_DEFAULT_REGION=us-east-1 \
+                      amazon/aws-cli -c 'aws --endpoint-url http://localstack:4566 s3api head-bucket --bucket taskflow-tfstate \
+                        || aws --endpoint-url http://localstack:4566 s3 mb s3://taskflow-tfstate'
+                '''
+                script {
+                    terraform 'init -reconfigure -input=false -no-color'
+                    def rc = terraform('plan -input=false -no-color -detailed-exitcode -out=tfplan', [status: true])
+                    if (rc == 1) {
+                        error('terraform plan failed')
+                    }
+                    env.TF_CHANGES = rc == 2 ? 'true' : 'false'
+                    writeFile file: 'infra/terraform/tfplan.txt', text: terraform('show -no-color tfplan', [stdout: true])
+                    echo "Terraform changes pending: ${env.TF_CHANGES}"
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'infra/terraform/tfplan, infra/terraform/tfplan.txt', allowEmptyArchive: true
+                }
+            }
+        }
+
+        stage('Approval') {
+            when {
+                branch 'main'
+                environment name: 'TF_CHANGES', value: 'true'
+            }
+            steps {
+                script {
+                    def summary = sh(script: "grep -E '^(Plan:|  # )' infra/terraform/tfplan.txt || true", returnStdout: true).trim()
+                    timeout(time: 15, unit: 'MINUTES') {
+                        input message: "Apply this Terraform plan?\n\n${summary}", ok: 'Apply'
+                    }
+                }
+            }
+        }
+
+        stage('Terraform Apply') {
+            when {
+                branch 'main'
+                environment name: 'TF_CHANGES', value: 'true'
+            }
+            steps {
+                script {
+                    terraform 'apply -input=false -no-color tfplan'
+                    terraform 'output -no-color'
+                }
+            }
+        }
+
+        stage('Configure with Ansible') {
+            when { branch 'main' }
+            steps {
+                script {
+                    def host = terraform('output -raw host_name', [stdout: true]).trim()
+                    writeFile file: 'infra/ansible/inventory.ini',
+                              text: "[taskflow]\n${host} ansible_connection=community.docker.docker_api\n"
+                }
+                sh """
+                    docker run --rm --network jenkins-net \\
+                      --volumes-from "\$HOSTNAME" --user "\$(id -u):\$(id -g)" \\
+                      -v /var/run/docker.sock:/var/run/docker.sock \\
+                      -e TASKFLOW_IMAGE=${env.IMAGE_TAG} -w "\$PWD/infra/ansible" \\
+                      taskflow-ansible:ci ansible-playbook -i inventory.ini playbook.yml
+                """
             }
         }
 

@@ -1,0 +1,35 @@
+---
+- name: Configure the taskflow-api host
+  hosts: taskflow
+  gather_facts: true
+  vars:
+    taskflow_image: "{{ lookup('ansible.builtin.env', 'TASKFLOW_IMAGE', default='localhost:5001/taskflow-api:init') }}"
+
+  tasks:
+    - name: Install Node.js and Docker
+      ansible.builtin.apt:
+        name:
+          - nodejs
+          - docker.io
+        state: present
+        update_cache: true
+        install_recommends: false
+
+    - name: Pull the taskflow-api image built in Lab 07
+      ansible.builtin.command:
+        cmd: "docker pull {{ taskflow_image }}"
+      register: taskflow_pull
+      changed_when: "'Downloaded newer image' in taskflow_pull.stdout"
+
+    - name: Read installed tool versions
+      ansible.builtin.command:
+        cmd: "{{ item }}"
+      loop:
+        - node --version
+        - docker --version
+      register: taskflow_versions
+      changed_when: false
+
+    - name: Show installed tool versions
+      ansible.builtin.debug:
+        msg: "{{ taskflow_versions.results | map(attribute='stdout') | list }}"

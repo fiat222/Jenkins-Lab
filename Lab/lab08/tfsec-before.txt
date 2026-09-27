@@ -1,0 +1,98 @@
+Unable to find image 'aquasec/tfsec:latest' locally
+latest: Pulling from aquasec/tfsec
+4770d1eb7e49: Pulling fs layer
+622cd280150a: Pulling fs layer
+000d9b49a098: Pulling fs layer
+4770d1eb7e49: Download complete
+000d9b49a098: Download complete
+000d9b49a098: Pull complete
+622cd280150a: Download complete
+622cd280150a: Pull complete
+4770d1eb7e49: Pull complete
+Digest: sha256:ac46d48a384ae2c0bbd0413cd2a18229e45e21a44d22c8be28b56de5b38d74c3
+Status: Downloaded newer image for aquasec/tfsec:latest
+
+======================================================
+tfsec is joining the Trivy family
+
+tfsec will continue to remain available 
+for the time being, although our engineering 
+attention will be directed at Trivy going forward.
+
+You can read more here: 
+https://github.com/aquasecurity/tfsec/discussions/1994
+======================================================
+
+Result #1 CRITICAL Security group rule allows ingress from public internet. 
+────────────────────────────────────────────────────────────────────────────────
+  main.tf:26
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-no-public-ingress-sgr
+      Impact Your port exposed to the internet
+  Resolution Set a more restrictive cidr range
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/no-public-ingress-sgr/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule#cidr_blocks
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #2 CRITICAL Security group rule allows egress to multiple public internet addresses. 
+────────────────────────────────────────────────────────────────────────────────
+  main.tf:33
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-no-public-egress-sgr
+      Impact Your port is egressing data to the internet
+  Resolution Set a more restrictive cidr range
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/no-public-egress-sgr/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #3 HIGH Instance does not require IMDS access to require a token 
+────────────────────────────────────────────────────────────────────────────────
+  main.tf:37-45
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-enforce-http-token-imds
+      Impact Instance metadata service can be interacted with freely
+  Resolution Enable HTTP token requirement for IMDS
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/enforce-http-token-imds/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#metadata-options
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #4 HIGH Root block device is not encrypted. 
+────────────────────────────────────────────────────────────────────────────────
+  main.tf:37-45
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-enable-at-rest-encryption
+      Impact The block device could be compromised and read from
+  Resolution Turn on encryption for all block devices
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/enable-at-rest-encryption/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/instance#ebs-ephemeral-and-root-block-devices
+────────────────────────────────────────────────────────────────────────────────
+
+
+Result #5 LOW Security group rule does not have a description. 
+────────────────────────────────────────────────────────────────────────────────
+  main.tf:29-34
+────────────────────────────────────────────────────────────────────────────────
+          ID aws-ec2-add-description-to-security-group-rule
+      Impact Descriptions provide context for the firewall rule reasons
+  Resolution Add descriptions for all security groups rules
+
+  More Information
+  - https://aquasecurity.github.io/tfsec/v1.28.14/checks/aws/ec2/add-description-to-security-group-rule/
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group
+  - https://registry.terraform.io/providers/hashicorp/aws/latest/docs/resources/security_group_rule
+────────────────────────────────────────────────────────────────────────────────
+
+
+  3 passed, 5 potential problem(s) detected.
+

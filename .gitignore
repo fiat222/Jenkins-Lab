@@ -43,3 +43,11 @@ tmp/
 
 # Misc
 Thumbs.db
+
+# Terraform: state is remote (LocalStack S3); never commit local state or plans
+.terraform/
+*.tfstate
+*.tfstate.*
+tfplan
+tfplan.txt
+infra/ansible/inventory.ini

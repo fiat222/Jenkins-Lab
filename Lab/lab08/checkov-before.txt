@@ -1,0 +1,66 @@
+Unable to find image 'bridgecrew/checkov:latest' locally
+latest: Pulling from bridgecrew/checkov
+bc865160cf4f: Pulling fs layer
+f9efa1b83d06: Pulling fs layer
+8dc75f66ede5: Pulling fs layer
+9b572620c7d3: Pulling fs layer
+6310eb16bf42: Pulling fs layer
+a234db272e8a: Pulling fs layer
+38673aee4001: Pulling fs layer
+db840d086b65: Pulling fs layer
+3678bb828654: Pulling fs layer
+bc865160cf4f: Download complete
+3678bb828654: Download complete
+f9efa1b83d06: Download complete
+9b572620c7d3: Download complete
+a234db272e8a: Download complete
+44136fa355b3: Already exists
+15f39058d5e4: Download complete
+db840d086b65: Download complete
+6310eb16bf42: Download complete
+8dc75f66ede5: Download complete
+6310eb16bf42: Pull complete
+3678bb828654: Pull complete
+38673aee4001: Download complete
+db840d086b65: Pull complete
+f9efa1b83d06: Pull complete
+38673aee4001: Pull complete
+8dc75f66ede5: Pull complete
+9b572620c7d3: Pull complete
+a234db272e8a: Pull complete
+bc865160cf4f: Pull complete
+Digest: sha256:d3e96adafdb315ca82e792ca8708c01adae85292800fb064c8b309b3d0cb7b80
+Status: Downloaded newer image for bridgecrew/checkov:latest
+terraform scan results:
+
+Passed checks: 8, Failed checks: 7, Skipped checks: 0
+
+Check: CKV_AWS_382: "Ensure no security groups allow egress from 0.0.0.0:0 to port -1"
+	FAILED for resource: aws_security_group.taskflow
+	File: /main.tf:17-35
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/bc-aws-382
+Check: CKV_AWS_23: "Ensure every security group and rule has a description"
+	FAILED for resource: aws_security_group.taskflow
+	File: /main.tf:17-35
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-networking-policies/networking-31
+Check: CKV_AWS_79: "Ensure Instance Metadata Service Version 1 is not enabled"
+	FAILED for resource: aws_instance.taskflow
+	File: /main.tf:37-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/bc-aws-general-31
+Check: CKV_AWS_135: "Ensure that EC2 is EBS optimized"
+	FAILED for resource: aws_instance.taskflow
+	File: /main.tf:37-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/ensure-that-ec2-is-ebs-optimized
+Check: CKV_AWS_8: "Ensure all data stored in the Launch configuration or instance Elastic Blocks Store is securely encrypted"
+	FAILED for resource: aws_instance.taskflow
+	File: /main.tf:37-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-general-policies/general-13
+Check: CKV_AWS_126: "Ensure that detailed monitoring is enabled for EC2 instances"
+	FAILED for resource: aws_instance.taskflow
+	File: /main.tf:37-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-logging-policies/ensure-that-detailed-monitoring-is-enabled-for-ec2-instances
+Check: CKV2_AWS_41: "Ensure an IAM role is attached to EC2 instance"
+	FAILED for resource: aws_instance.taskflow
+	File: /main.tf:37-45
+	Guide: https://docs.prismacloud.io/en/enterprise-edition/policy-reference/aws-policies/aws-iam-policies/ensure-an-iam-role-is-attached-to-ec2-instance
+
