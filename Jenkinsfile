@@ -316,10 +316,17 @@ pipeline {
             }
             post {
                 failure {
-                    withCredentials([file(credentialsId: 'kind-kubeconfig', variable: 'KUBECONFIG')]) {
-                        sh "kubectl patch svc taskflow -p '{\"spec\":{\"selector\":{\"color\":\"${env.CURRENT_COLOR}\"}}}'"
-                        sh "kubectl rollout undo deployment/taskflow-${env.NEXT_COLOR} || true"
-                        echo "ROLLBACK: traffic kept on ${env.CURRENT_COLOR}"
+                    script {
+                        // Patching with an unset color would point the Service at no pods.
+                        if (['blue', 'green'].contains(env.CURRENT_COLOR)) {
+                            withCredentials([file(credentialsId: 'kind-kubeconfig', variable: 'KUBECONFIG')]) {
+                                sh "kubectl patch svc taskflow -p '{\"spec\":{\"selector\":{\"color\":\"${env.CURRENT_COLOR}\"}}}'"
+                                sh "kubectl rollout undo deployment/taskflow-${env.NEXT_COLOR} || true"
+                                echo "ROLLBACK: traffic kept on ${env.CURRENT_COLOR}"
+                            }
+                        } else {
+                            echo 'ROLLBACK skipped: current color was never read, Service left untouched'
+                        }
                     }
                 }
             }
