@@ -28,118 +28,88 @@ pipeline {
     }
 
     stages {
-        stage('Build & Test on Kubernetes') {
-            // Each run gets a fresh pod from the kind cloud, deleted once these stages finish.
+        // Cheapest gate first: stop on a leaked credential before spending any other compute.
+        stage('Secrets Detection') {
             agent {
                 kubernetes {
                     cloud 'kind'
-                    defaultContainer 'node'
-                    yaml '''
-                        apiVersion: v1
-                        kind: Pod
-                        spec:
-                          containers:
-                          - name: node
-                            image: node:20-alpine
-                            command: ['cat']
-                            tty: true
-                    '''
+                    yamlFile 'ci/k8s/pods/scan.yaml'
+                    defaultContainer 'gitleaks'
                 }
             }
-            stages {
-                stage('Install') {
-                    steps { dir('backend') { sh 'npm ci' } }
-                }
-                stage('Lint') {
-                    steps { dir('backend') { sh 'npm run lint' } }
-                }
-                stage('Unit Test') {
-                    steps { dir('backend') { sh 'npm test -- --coverage' } }
-                }
+            steps {
+                sh '''
+                    mkdir -p security
+                    gitleaks detect --source . --config .gitleaks.toml --log-opts="--all" \
+                      --report-format json --report-path security/gitleaks.json
+                '''
             }
             post {
                 always {
-                    junit 'backend/reports/junit.xml'
-                    recordCoverage tools: [[parser: 'COBERTURA', pattern: 'backend/coverage/cobertura-coverage.xml']]
-                    archiveArtifacts artifacts: 'backend/npm-debug.log*', allowEmptyArchive: true
-                    stash name: 'unit-test-results', includes: 'backend/coverage/**,backend/reports/**', allowEmpty: true
+                    archiveArtifacts artifacts: 'security/gitleaks.json', allowEmptyArchive: true
                 }
             }
         }
 
-        // Scanners, image builds, deploys and IaC drive Docker through the agent's socket.
-        stage('Security, Delivery & IaC') {
-            agent {
-                dockerfile {
-                    filename 'Dockerfile'
-                    dir 'ci'
-                    label 'linux-build'
-                    // Build containers must share SonarQube's network for DNS resolution.
-                    // Docker Pipeline first supplies -u 1000:1000. The agent mounts
-                    // its daemon socket as root:root (0660), so this final user value
-                    // keeps UID 1000 while granting the required socket group.
-                    args '--network jenkins-net -u 1000:0'
+        // Independent checks share one parallel block, each on its own pod; any failure stops the rest.
+        stage('Parallel Checks') {
+            failFast true
+            parallel {
+                stage('Lint') {
+                    agent {
+                        kubernetes {
+                            cloud 'kind'
+                            yamlFile 'ci/k8s/pods/node.yaml'
+                            defaultContainer 'node'
+                        }
+                    }
+                    steps { dir('backend') { sh 'npm ci && npm run lint' } }
                 }
-            }
-            stages {
-        	stage('Secrets Detection') {
-              	    steps {
-                  	sh '''
-                      	    mkdir -p security
-                      	    docker run --rm \
-                            --volumes-from "$HOSTNAME" \
-                            --workdir "$PWD" \
-                            zricethezav/gitleaks:v8.21.2 \
-                            detect \
-                            --source . \
-                            --config .gitleaks.toml \
-                            --log-opts="--all" \
-                            --report-format json \
-                            --report-path security/gitleaks.json
-                  	'''
-              	    }
-              	    post {
-                  	always {
-                      	    archiveArtifacts artifacts: 'security/gitleaks.json', allowEmptyArchive: true
-                  	}
-              	    }
-          	}
-
+                stage('Unit Test') {
+                    agent {
+                        kubernetes {
+                            cloud 'kind'
+                            yamlFile 'ci/k8s/pods/node.yaml'
+                            defaultContainer 'node'
+                        }
+                    }
+                    steps { dir('backend') { sh 'npm ci && npm test -- --coverage' } }
+                    post {
+                        always {
+                            junit 'backend/reports/junit.xml'
+                            recordCoverage tools: [[parser: 'COBERTURA', pattern: 'backend/coverage/cobertura-coverage.xml']]
+                            archiveArtifacts artifacts: 'backend/npm-debug.log*', allowEmptyArchive: true
+                            stash name: 'unit-test-results', includes: 'backend/coverage/**,backend/reports/**', allowEmpty: true
+                        }
+                    }
+                }
                 stage('SAST') {
+                    agent {
+                        kubernetes {
+                            cloud 'kind'
+                            yamlFile 'ci/k8s/pods/scan.yaml'
+                            defaultContainer 'node'
+                        }
+                    }
                     steps {
-                        sh '''
-                            mkdir -p security
-
-                            # node_modules lives on the Kubernetes pod; ESLint plugins are needed here too.
-                            (cd backend && npm ci --no-audit --no-fund)
-
-                            set +e
-                            (
-                                cd backend
-                                npx eslint --plugin security --ext .ts src/ \
-                                --format @microsoft/eslint-formatter-sarif \
-                                --output-file ../security/eslint.sarif
-                            )
-                            eslint_status=$?
-
-                            docker run --rm \
-                                --volumes-from "$HOSTNAME" \
-                                --workdir "$PWD" \
-                                returntocorp/semgrep:1.95.0 \
-                                semgrep scan \
-                                --config=p/owasp-top-ten \
-                                --config=p/nodejs \
-                                --sarif \
-                                --output security/semgrep.sarif \
-                                .
-                            semgrep_status=$?
-                            set -e
-
-                            if [ "$eslint_status" -gt 1 ] || [ "$semgrep_status" -ne 0 ]; then
-                                echo "SAST scanner failed: eslint=$eslint_status semgrep=$semgrep_status"
-                                exit 1
-                            fi
-                        '''
+                        sh 'mkdir -p security && cd backend && npm ci --no-audit --no-fund'
+                        script {
+                            // ESLint exits 1 for findings (reported in SARIF) and >1 when the scanner itself breaks.
+                            int eslintStatus = sh(returnStatus: true, script: '''
+                                cd backend && npx eslint --plugin security --ext .ts src/ \
+                                  --format @microsoft/eslint-formatter-sarif --output-file ../security/eslint.sarif
+                            ''')
+                            int semgrepStatus = 0
+                            container('semgrep') {
+                                semgrepStatus = sh(returnStatus: true, script: '''
+                                    semgrep scan --config=p/owasp-top-ten --config=p/nodejs \
+                                      --sarif --output security/semgrep.sarif .
+                                ''')
+                            }
+                            if (eslintStatus > 1 || semgrepStatus != 0) {
+                                error("SAST scanner failed: eslint=${eslintStatus} semgrep=${semgrepStatus}")
+                            }
+                        }
                     }
                     post {
                         always {
@@ -147,13 +117,18 @@ pipeline {
                         }
                     }
                 }
-
                 stage('SCA - npm audit') {
+                    agent {
+                        kubernetes {
+                            cloud 'kind'
+                            yamlFile 'ci/k8s/pods/node.yaml'
+                            defaultContainer 'node'
+                        }
+                    }
                     steps {
                         dir('backend') {
                             script {
                                 sh 'npm audit --json > audit.json || true'
-
                                 def counts = sh(script: """node -e 'const v=require("./audit.json").metadata?.vulnerabilities; if (!v) process.exit(2); console.log([v.critical||0,v.high||0,v.moderate||0,v.low||0].join(","))'""", returnStdout: true).trim().split(',')
                                 int critical = counts[0].toInteger()
                                 int high = counts[1].toInteger()
@@ -175,10 +150,28 @@ pipeline {
                     post {
                         always {
                             archiveArtifacts artifacts: 'backend/audit.json', allowEmptyArchive: true
+                            stash name: 'npm-audit', includes: 'backend/audit.json', allowEmpty: true
                         }
                     }
                 }
+            }
+        }
 
+        // Scanners, image builds, deploys and IaC drive Docker through the agent's socket.
+        stage('Security, Delivery & IaC') {
+            agent {
+                dockerfile {
+                    filename 'Dockerfile'
+                    dir 'ci'
+                    label 'linux-build'
+                    // Build containers must share SonarQube's network for DNS resolution.
+                    // Docker Pipeline first supplies -u 1000:1000. The agent mounts
+                    // its daemon socket as root:root (0660), so this final user value
+                    // keeps UID 1000 while granting the required socket group.
+                    args '--network jenkins-net -u 1000:0'
+                }
+            }
+            stages {
                 stage('Generate SBOM') {
                     steps {
                         sh '''
@@ -232,6 +225,7 @@ pipeline {
           
                 stage('Policy Gate') {
                     steps {
+                        unstash 'npm-audit'
                         sh '''
                             docker run --rm \
                                 --volumes-from "$HOSTNAME" \

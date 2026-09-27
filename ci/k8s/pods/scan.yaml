@@ -1,0 +1,17 @@
+# Scanner sidecars run in the pod itself, so these gates need no Docker socket.
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+    - name: node
+      image: node:20-alpine
+      command: ['cat']
+      tty: true
+    - name: semgrep
+      image: returntocorp/semgrep:1.95.0
+      command: ['cat']
+      tty: true
+    - name: gitleaks
+      image: zricethezav/gitleaks:v8.21.2
+      command: ['cat']
+      tty: true
