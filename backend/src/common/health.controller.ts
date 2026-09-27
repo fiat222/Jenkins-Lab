@@ -35,7 +35,7 @@ export class HealthController {
       status: 'live',
       instance: process.env.HOSTNAME ?? 'local',
       // Commit the running image was built from, so clients can show which API build they reach.
-      version: buildVersion(),
+      version: process.env.APP_VERSION ?? 'dev',
     };
   }
 
@@ -82,9 +82,4 @@ export class HealthController {
     }
     return { ok: postgres && redis, postgres, redis, redisError };
   }
-}
-
-// Parses the build number out of APP_VERSION.
-function buildVersion(): number {
-  return process.env.APP_VERSION ?? 'dev';
 }
